@@ -1,5 +1,7 @@
 from Cube import Cube
+import numpy as np
 
 
 cube = Cube()
-cube.mix_cube(sequence_length=5)
+cube.mix(sequence_length=15)
+cube.plot()

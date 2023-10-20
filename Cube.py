@@ -12,9 +12,14 @@ COLOR_ID_TO_RGB = {
     0: [0, 0, 0]
 }
 
+ACTION_SPACE = ["F", "R", "U", "L", "B", "D", "F_dash", "R_dash", "U_dash", "L_dash", "B_dash", "D_dash"]
+
 
 class Cube:
     def __init__(self) -> None:
+        self.reset()
+
+    def reset(self):
         self.flattened_cube = np.zeros(shape=(9, 12))
 
         # set up ordered/solved cube
@@ -35,17 +40,21 @@ class Cube:
                 # right-right
                 self.flattened_cube[3 + i][9 + j] = 6
 
-    def mix_cube(self, sequence_length=10) -> None:
+    def mix(self, sequence_length=10) -> None:
         sequence = []
         for _ in range(sequence_length):
-            sequence.append(np.random.choice(["F", "R", "U", "L", "B", "D"]))
-        self.execute_sequence(sequence)
+            sequence.append(np.random.choice(ACTION_SPACE))
+        
+        flattened_cubes = self.execute_sequence(sequence)
+        sequence_idxes = [ACTION_SPACE.index(el) for el in sequence]
 
-        self.plot_cube()
+        return flattened_cubes, sequence_idxes
 
     def execute_sequence(self, sequence):
+        cube_states = []
+
         for action in sequence:
-            print(f"Executing: {action}")
+            # print(f"Executing: {action}")
             if action == "F":
                 self.F()
             elif action == "R":
@@ -58,6 +67,26 @@ class Cube:
                 self.B()
             elif action == "D":
                 self.D()
+            elif action == "F_dash":
+                self.F_dash()
+            elif action == "R_dash":
+                self.R_dash()
+            elif action == "U_dash":
+                self.U_dash()
+            elif action == "L_dash":
+                self.L_dash()
+            elif action == "B_dash":
+                self.B_dash()
+            elif action == "D_dash":
+                self.D_dash()
+            
+            cube_states.append(self.flattened_cube)
+        
+        return cube_states
+    
+    def execute_action_idx(self, idx):
+        sequence = [ACTION_SPACE[idx]]
+        self.execute_sequence(sequence)
 
     def F(self) -> None:
         # outer rim
@@ -73,6 +102,10 @@ class Cube:
 
         # inner area
         self.rotate_inner_area_cw(starting_point=(3, 3))
+    
+    def F_dash(self):
+        for _ in range(3):
+            self.F()
 
     def R(self) -> None:
         # outer rim
@@ -92,6 +125,10 @@ class Cube:
         # inner area
         self.rotate_inner_area_cw(starting_point=(3, 6))
     
+    def R_dash(self):
+        for _ in range(3):
+            self.R()
+    
     def L(self):
         # outer rim
         upper_right_backup = np.copy(self.flattened_cube[:3][:, 3])
@@ -107,6 +144,10 @@ class Cube:
         # inner area
         self.rotate_inner_area_cw(starting_point=(3, 0))
     
+    def L_dash(self):
+        for _ in range(3):
+            self.L()
+    
     def B(self):
         # outer rim
         upper_upper_row_backup = np.copy(self.flattened_cube[0][3:6])
@@ -121,6 +162,10 @@ class Cube:
 
         # inner area
         self.rotate_inner_area_cw(starting_point=(3, 9))
+    
+    def B_dash(self):
+        for _ in range(3):
+            self.B()
 
     def U(self) -> None:
         # outer rim
@@ -137,6 +182,10 @@ class Cube:
         # inner area
         self.rotate_inner_area_cw(starting_point=(0, 3))
     
+    def U_dash(self):
+        for _ in range(3):
+            self.U()
+    
     def D(self):
         # outer rim
         left_lower_backup = np.copy(self.flattened_cube[5][:3])
@@ -151,6 +200,10 @@ class Cube:
 
         # inner area
         self.rotate_inner_area_cw(starting_point=(6, 3))
+    
+    def D_dash(self):
+        for _ in range(3):
+            self.D()
 
     # HELPER FUNCTIONS
     def rotate_inner_area_cw(self, starting_point):
@@ -160,8 +213,35 @@ class Cube:
         for i in range(3):
             for j in range(3):
                 self.flattened_cube[starting_point[0] + i][starting_point[1] + j] = inner_rotated[i][j]
+    
+    def is_solved(self):
+        solved_state = np.zeros(shape=(9, 12))
 
-    def plot_cube(self) -> None:
+        # set up ordered/solved cube
+        for i in range(3):
+            for j in range(3):
+                # left
+                self.flattened_cube[3 + i][j] = 1
+                # top
+                self.flattened_cube[i][3 + j] = 2
+                # middle
+                self.flattened_cube[3 + i][3 + j] = 3
+                # bottom
+                self.flattened_cube[6 + i][3 + j] = 4
+                # right
+                self.flattened_cube[3 + i][6 + j] = 5
+                # right-right
+                self.flattened_cube[3 + i][9 + j] = 6
+        
+        result = True
+        for i in range(self.flattened_cube.shape[0]):
+            for j in range(self.flattened_cube.shape[1]):
+                if self.flattened_cube[i][j] != solved_state[i][j]:
+                    result = False
+        
+        return result
+
+    def plot(self) -> None:
         flattened_as_img = np.zeros(shape=(9, 12, 3))
         for i in range(len(self.flattened_cube)):
             for j in range(len(self.flattened_cube[i])):
