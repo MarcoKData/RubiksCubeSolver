@@ -4,8 +4,8 @@ import os
 import numpy as np
 
 
-N_SAMPLES = 20
-N_EPOCHS = 10
+N_SAMPLES = 100
+N_EPOCHS = 30
 N_ITERATIONS = 20
 
 save_path = os.path.join(".", "models", "model.h5")
