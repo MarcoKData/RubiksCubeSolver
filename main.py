@@ -4,14 +4,16 @@ import os
 
 
 """train(
-    n_epochs=50,
+    n_epochs=5,
     n_iterations=20,
-    n_samples=100,
-    save_weights=False,
-    load_weights=True
+    n_samples=10,
+    save_weights=True,
+    load_weights=True,
+    load_path=os.path.join(".", "models", "model.h5"),
+    save_path=os.path.join(".", "models", "model-save-path.h5")
 )"""
 
-load_path = os.path.join(".", "models", "model-N6-cubes.h5")
+load_path = os.path.join(".", "models", "model-save-path.h5")
 
 max_length_solving_seq, max_solved_n_shuffles = inference(
     load_path=load_path,
