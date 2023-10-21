@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 
-def train(n_epochs, n_iterations, n_samples, save_weights=True, load_weights=True, save_path=".", load_path="."):
+def train(n_epochs, n_iterations, n_samples, save_weights=True, load_weights=True, save_path="model.h5", load_path="model.h5"):
     model = build_model()
     if load_weights:
         model.load_weights(load_path)
