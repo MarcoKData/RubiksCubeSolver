@@ -1,12 +1,12 @@
-from train import train
-from inference import *
+import rubiks_ai as ai
+import parse_cube as parser
 import os
 
 
 load_path = os.path.join(".", "models", "model-5.h5")
 
 # train the model
-"""train(
+"""ai.train(
     n_epochs=1,
     n_iterations=20,
     n_samples=5,
@@ -18,7 +18,7 @@ load_path = os.path.join(".", "models", "model-5.h5")
 
 
 # check how far the model can get (n_shuffles) with random cubes
-"""max_length_solving_seq, max_solved_n_shuffles = inference(
+"""max_length_solving_seq, max_solved_n_shuffles = ai.inference(
     load_path=load_path,
     max_steps_until_solved=50
 )
@@ -29,7 +29,7 @@ print(f"max_solved_n_shuffles = {max_solved_n_shuffles}")"""
 
 
 # solve single random cube with specified n_shuffles
-"""steps, solved = single_random_cube_solve(n_shuffles=5, model_path=load_path)
+"""steps, solved = ai.single_random_cube_solve(n_shuffles=5, model_path=load_path)
 if solved:
     print("Solved! Steps:")
     print(steps)
@@ -45,13 +45,13 @@ b = ["yellow", "yellow", "red", "blue", "blue", "red", "blue", "blue", "white"]
 u = ["blue", "orange", "orange", "red", "yellow", "yellow", "green", "green", "green"]
 d = ["orange", "orange", "blue", "white", "white", "blue", "green", "red", "red"]
 
-cube = make_cube_from_flattened_sides(f, r, l, b, u, d)
+cube = parser.make_cube_from_flattened_sides(f, r, l, b, u, d)
 print(cube)
 
-model = build_model()
+model = ai.build_model()
 model.load_weights(load_path)
 
-steps, solved = solve_cube(cube, model)
+steps, solved = ai.solve_cube(cube, model)
 if solved:
     print("Solved! Steps:")
     print(steps)

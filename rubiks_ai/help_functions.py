@@ -10,15 +10,6 @@ color_list_map = {'green': [1, 0, 0, 0, 0, 0], 'blue': [0, 1, 0, 0, 0, 0], 'yell
 inv_action_map = {v: k for k, v in action_map.items()}
 
 
-def make_cube_from_flattened_sides(f, r, l, b, u, d):
-    # order: l u f d r b
-    cube_flattened = l + u + f + d + r + b
-    cubies = pc.array_to_cubies(cube_flattened)
-    cube = pc.Cube(cubies)
-    
-    return cube
-
-
 def generate_sequence(n_shuffles=5):
     cube = pc.Cube()
     transformations = [random.choice(list(action_map.keys())) for _ in range(n_shuffles)]
