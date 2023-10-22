@@ -133,7 +133,15 @@ def chunker(seq, size):
 ## INFERENCE
 def generate_sample_cube(n_shuffles=5):
     cube = pc.Cube()
-    transformations = [random.choice(list(action_map.keys())) for _ in range(n_shuffles)]
+    transformations = []
+    for _ in range(n_shuffles):
+        if len(transformations) == 0:
+            list_of_actions = list(action_map.keys())
+        else:
+            list_of_actions = [action for action in list(action_map.keys()) if action != transformations[-1]]
+        
+        transformations.append(random.choice(list_of_actions))
+
     formula = pc.Formula(transformations)
     cube(formula)
 

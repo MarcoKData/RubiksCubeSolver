@@ -1,10 +1,31 @@
 from model import build_model
 from help_functions import *
-import os
 import numpy as np
+from datetime import datetime
+import json
 
 
-def train(n_epochs, n_iterations, n_samples, save_weights=True, load_weights=True, save_path="model.h5", load_path="model.h5"):
+def save_training_times(path, seconds_trained):
+    with open(path, "r") as file:
+        training_times = json.load(file)
+    
+    training_times.append(seconds_trained)
+
+    with open(path, "w") as file:
+        file.write(json.dumps(training_times, indent=4))
+    
+    print("Saved training times!")
+
+
+def train(
+    n_epochs,
+    n_iterations,
+    n_samples,
+    save_training_times_path,
+    save_weights=True,
+    load_weights=True,
+    save_path="model.h5",
+    load_path="model.h5"):
     model = build_model()
     if load_weights:
         model.load_weights(load_path)
@@ -17,8 +38,14 @@ def train(n_epochs, n_iterations, n_samples, save_weights=True, load_weights=Tru
 
     for i in range(n_epochs):
         print(f"\n\n\n######## EPOCH {i + 1}/{n_epochs} ########\n")
+        with open(save_training_times_path, "r") as file:
+            training_times = json.load(file)
+        total_seconds_trained = np.array(training_times).sum()
+        print(f"Trained {total_seconds_trained} Seconds ({total_seconds_trained / 3600} Hours) by now...")
+
         # generate samples
         print("Generating Dataset...")
+        t0 = datetime.now()
         cubes, distances_to_solved = generate_cube_sequences(n_samples)
         # cubes_next_rewards: (n, 12), flat_next_states: (n * 12, 324), cubes_flat: (n, 324)
         cubes_next_rewards, flat_next_states, cubes_flat = get_actions_rewards(cubes)
@@ -59,5 +86,9 @@ def train(n_epochs, n_iterations, n_samples, save_weights=True, load_weights=Tru
         if save_weights:
             model.save_weights(save_path)
             print("Saved Model Weights!")
+
+            t1 = datetime.now()
+            seconds_trained = (t1 - t0).total_seconds()
+            save_training_times(save_training_times_path, seconds_trained)
         else:
-            print("Skipped saving Model Weights.")
+            print("Skipped saving Model Weights and Training Time.")
