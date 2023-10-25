@@ -1,5 +1,5 @@
-from model import build_model
-from help_functions import *
+from .model import build_model
+from .help_functions import *
 import numpy as np
 from datetime import datetime
 import json

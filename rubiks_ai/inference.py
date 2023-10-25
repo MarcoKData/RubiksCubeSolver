@@ -1,5 +1,5 @@
-from help_functions import *
-from model import build_model
+from .help_functions import *
+from .model import build_model
 import numpy as np
 
 
