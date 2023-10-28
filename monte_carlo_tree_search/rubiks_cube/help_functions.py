@@ -28,8 +28,9 @@ def get_undo_move(move):
 
 
 def get_children(cube, excluded_moves = []):
-    MOVES = ["F", "L", "R", "U", "D", "B", "F'", "L'", "R'", "U'", "D'", "B'"]
-    moves_to_use = [move for move in MOVES if move not in excluded_moves]
+    MOVES = ["F", "B", "U", "D", "L", "R", "F'", "B'", "U'", "D'", "L'", "R'"]
+    # moves_to_use = [move for move in MOVES if move not in excluded_moves]
+    moves_to_use = MOVES
 
     children = []
     for move in moves_to_use:

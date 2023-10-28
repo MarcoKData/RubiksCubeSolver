@@ -3,6 +3,7 @@ from .help_functions import *
 import random
 import math
 from keras import Model
+import numpy as np
 
 
 class TreeNode():
@@ -23,11 +24,15 @@ class TreeNode():
 
 
 class MCTS_CUBE():
-    def __init__(self, model: Model, num_iterations_per_move = 20, v_value_threshold = 0.35) -> None:
+    def __init__(self, model: Model, num_iterations_per_move = 20, iteration_limit_depth = 20, init_v_value_threshold = 0.0) -> None:
         self.model = model
         self.num_iterations_per_move = num_iterations_per_move
-        self.v_value_threshold = v_value_threshold
+        self.v_value_threshold = init_v_value_threshold
+        print(f"Set v-value threshold to {self.v_value_threshold} (init)")
         self.excluded_cube_state_str = None
+        self.iteration_limit_depth = iteration_limit_depth
+
+        self.move_scores_history = []
 
     def exclude_cube_state_for_next_round(self, cube: Cube) -> None:
         self.excluded_cube_state_str = str(cube)
@@ -44,12 +49,15 @@ class MCTS_CUBE():
         """
         self.root = TreeNode(cube=cube, parent=None, move_made=None)
 
-        for _ in range(self.num_iterations_per_move):
+        for i in range(self.num_iterations_per_move):
+            if (i + 1) % 10 == 0:
+                print(f"{i + 1}/{self.num_iterations_per_move}")
+
             node = self.select(self.root)
             score = self.rollout(node.cube)
             self.backpropagate(node, score)
 
-        return self.get_best_move(self.root, 0, print_score=True)
+        return self.get_best_move(self.root, 0, print_score=True, append_to_history=True)
 
     def select(self, node: TreeNode) -> TreeNode:
         while not node.is_terminal:
@@ -72,7 +80,7 @@ class MCTS_CUBE():
 
                 return new_node
     
-    def get_best_move(self, node: TreeNode, exploration_constant: float, print_score=False):
+    def get_best_move(self, node: TreeNode, exploration_constant: float, print_score=False, append_to_history=False):
         best_score = float("-inf")
         best_moves = []
 
@@ -83,6 +91,8 @@ class MCTS_CUBE():
 
             # get move score using UCT1 formula
             move_score = child_node.score / child_node.visits + exploration_constant * math.sqrt(math.log(node.visits) / child_node.visits)
+            """if print_score:
+                print("move score:", move_score)"""
 
             if move_score > best_score:
                 # better move has been found
@@ -96,24 +106,55 @@ class MCTS_CUBE():
         sampled_best_move = random.choice(best_moves)
         if print_score:
             print("Score for move:", best_score)
+        if append_to_history:
+            self.move_scores_history.append(best_score)
 
         return sampled_best_move
 
     def rollout(self, cube: Cube) -> float:
-        # random moves until terminal state is reached (num_iterations in infinite game)
-        predicted_v_value = self.model.predict([flatten_one_hot(cube)], verbose=0)[0][0][0]
+        # indices in predicted policy
+        MOVES = ["F", "B", "U", "D", "L", "R", "F'", "B'", "U'", "D'", "L'", "R'"]
+
+        predicted_v_value, policy = self.model.predict([flatten_one_hot(cube)], verbose=0)
+        predicted_v_value = predicted_v_value[0][0]
+        policy = policy[0]
+        CONSIDER_BEST_N_FROM_POLICY = 3
+
         last_move = None
+        counter = 0
+
+        values = [predicted_v_value]
+
+        SLIDING_WINDOW_SIZE = 3
+        if len(self.move_scores_history) >= SLIDING_WINDOW_SIZE:
+            trailing_window = self.move_scores_history[-SLIDING_WINDOW_SIZE:]
+            threshold = sum(trailing_window) / len(trailing_window)
+
+            if self.v_value_threshold < threshold:
+                self.v_value_threshold = threshold
+                print(f"Set v-value threshold to {threshold}")
+
         while predicted_v_value < self.v_value_threshold:
-            undo_move = get_undo_move(last_move)
+            # undo_move = get_undo_move(last_move)
 
-            move, cube = random.choice(get_children(cube, excluded_moves=[undo_move]))
-            predicted_v_value = self.model.predict([flatten_one_hot(cube)], verbose=0)[0][0][0]
-            if predicted_v_value < 0:
-                return predicted_v_value
-            
-            last_move = move
+            idxes_to_consider = list(np.argpartition(list(policy), -CONSIDER_BEST_N_FROM_POLICY))[-CONSIDER_BEST_N_FROM_POLICY:]
 
-        return predicted_v_value
+            all_children = get_children(cube)
+            children_to_consider = [all_children[idx] for idx in idxes_to_consider]
+
+            _, cube = random.choice(children_to_consider)
+
+            predicted_v_value, policy = self.model.predict([flatten_one_hot(cube)], verbose=0)
+            predicted_v_value = predicted_v_value[0][0]
+            policy = policy[0]
+
+            values.append(predicted_v_value)
+
+            counter += 1
+            if counter > self.iteration_limit_depth:
+                break
+
+        return max(values)
 
     def backpropagate(self, node: TreeNode, score: float):
         while node is not None:

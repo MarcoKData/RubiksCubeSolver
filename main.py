@@ -87,13 +87,16 @@ else:
 # solve cube with mcts + nn
 cube = pc.Cube()
 
-MIX_SEQUENCE_LONG = ["F", "L", "L", "U", "B", "B", "L", "R", "U", "B", "L", "F", "R", "L"]
+MIX_SEQUENCE_BENCHMARK = ["F", "L", "L", "U", "B", "B", "L", "R", "U", "B", "L", "F", "R", "L", "B"]
 MIX_SEQUENCE_MEDIUM_PLUS = ["F", "L", "L", "U", "B", "B", "L", "R", "U", "B"]
 MIX_SEQUENCE_MEDIUM = ["F", "L", "L", "U", "B", "B", "L", "R"]
 MIX_SEQUENCE_SHORT = ["F", "L", "L", "U", "B", "B"]
+MIX_SEQUENCE_VERY_SHORT = ["F", "L", "L", "U"]
+
+MIX_SEQUENCE_MEDIUM_WILD = ["F'", "L", "L", "U", "B", "U'", "L", "R'"]
 
 cube = mcts_nn.execute_sequence(cube, MIX_SEQUENCE_MEDIUM)
 cube_original = cube.copy()
 
-solution = mcts_nn.solve_with_mcts(cube, load_path, max_moves=500, num_iterations_per_move=100, v_value_threshold=0.7)
+solution = mcts_nn.solve_with_mcts(cube, load_path, max_moves=500, num_iterations_per_move=50, iteration_limit_depth=20, init_v_value_threshold=10.0)
 print("Solution:", solution)

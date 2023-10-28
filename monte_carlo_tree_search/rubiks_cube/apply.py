@@ -69,11 +69,11 @@ def build_model(learning_rate=1e-4):
     return model
 
 
-def solve_with_mcts(cube: Cube, model_weights_path: str, max_moves: int, num_iterations_per_move: int, v_value_threshold: int) -> List[str]:
+def solve_with_mcts(cube: Cube, model_weights_path: str, max_moves: int, num_iterations_per_move: int, iteration_limit_depth: int, init_v_value_threshold: float) -> List[str]:
     model = build_model()
     model.load_weights(model_weights_path)
 
-    mcts = MCTS_CUBE(model=model, num_iterations_per_move=num_iterations_per_move, v_value_threshold=v_value_threshold)
+    mcts = MCTS_CUBE(model=model, num_iterations_per_move=num_iterations_per_move, iteration_limit_depth=iteration_limit_depth, init_v_value_threshold=init_v_value_threshold)
 
     moves_to_make = []
     for i in range(max_moves):
