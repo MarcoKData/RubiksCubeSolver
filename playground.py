@@ -1,12 +1,21 @@
-import pycuber as pc
 import parse_cube as parser
+import os
+from matplotlib import image
 
 
-f = ["red", "blue", "yellow", "yellow", "yellow", "red", "white", "red", "blue"]
-r = ["green", "green", "red", "yellow", "green", "red", "blue", "white", "white"]
-l = ["yellow", "red", "white", "white", "white", "blue", "yellow", "white", "blue"]
-b = ["blue", "blue", "green", "green", "blue", "red", "yellow", "yellow", "red"]
-u = ["orange", "orange", "orange", "blue", "orange", "orange", "red", "red", "white"]
-d = ["white", "blue", "blue", "yellow", "blue", "red", "orange", "red", "red"]
+f_path = os.path.join(".", "example_imgs", "f.png")
+b_path = os.path.join(".", "example_imgs", "b.png")
+d_path = os.path.join(".", "example_imgs", "d.png")
+l_path = os.path.join(".", "example_imgs", "l.png")
+r_path = os.path.join(".", "example_imgs", "r.png")
+u_path = os.path.join(".", "example_imgs", "u.png")
 
-print(parser.make_cube_from_flattened_sides(f, r, l, b, u, d))
+f_img = image.imread(f_path)
+b_img = image.imread(b_path)
+d_img = image.imread(d_path)
+l_img = image.imread(l_path)
+r_img = image.imread(r_path)
+u_img = image.imread(u_path)
+
+cube = parser.cube_from_side_imgs(f_img, r_img, l_img, b_img, u_img, d_img)
+print(cube)
