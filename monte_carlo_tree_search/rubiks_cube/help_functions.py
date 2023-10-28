@@ -16,11 +16,23 @@ def cube_is_solved(cube: Cube):
     return is_solved
 
 
-def get_children(cube):
+def get_undo_move(move):
+    undo_move = None
+    if move is not None:
+        if move[-1] == "'":
+            undo_move = move.replace("'", "")
+        else:
+            undo_move = move + "'"
+
+    return undo_move
+
+
+def get_children(cube, excluded_moves = []):
     MOVES = ["F", "L", "R", "U", "D", "B", "F'", "L'", "R'", "U'", "D'", "B'"]
+    moves_to_use = [move for move in MOVES if move not in excluded_moves]
 
     children = []
-    for move in MOVES:
+    for move in moves_to_use:
         cube_copy = cube.copy()
         children.append((move, cube_copy(move)))
     

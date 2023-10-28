@@ -2,6 +2,8 @@ import rubiks_ai as ai
 import parse_cube as parser
 import os
 from matplotlib import image
+import pycuber as pc
+import monte_carlo_tree_search as mcts_nn
 
 
 load_path = os.path.join(".", "models", "model.h5")
@@ -54,7 +56,7 @@ else:
 
 
 # solve specific cube from images
-f_path = os.path.join(".", "example_imgs", "f.png")
+"""f_path = os.path.join(".", "example_imgs", "f.png")
 b_path = os.path.join(".", "example_imgs", "b.png")
 d_path = os.path.join(".", "example_imgs", "d.png")
 l_path = os.path.join(".", "example_imgs", "l.png")
@@ -79,4 +81,19 @@ if solved:
     print("Solved! Steps:")
     print(steps)
 else:
-    print("Failed to solve!")
+    print("Failed to solve!")"""
+
+
+# solve cube with mcts + nn
+cube = pc.Cube()
+
+MIX_SEQUENCE_LONG = ["F", "L", "L", "U", "B", "B", "L", "R", "U", "B", "L", "F", "R", "L"]
+MIX_SEQUENCE_MEDIUM_PLUS = ["F", "L", "L", "U", "B", "B", "L", "R", "U", "B"]
+MIX_SEQUENCE_MEDIUM = ["F", "L", "L", "U", "B", "B", "L", "R"]
+MIX_SEQUENCE_SHORT = ["F", "L", "L", "U", "B", "B"]
+
+cube = mcts_nn.execute_sequence(cube, MIX_SEQUENCE_MEDIUM)
+cube_original = cube.copy()
+
+solution = mcts_nn.solve_with_mcts(cube, load_path, max_moves=500, num_iterations_per_move=100, v_value_threshold=0.7)
+print("Solution:", solution)

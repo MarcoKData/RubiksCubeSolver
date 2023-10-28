@@ -1,9 +1,8 @@
 from pycuber import Cube
-from help_functions import cube_is_solved, get_children, flatten_one_hot
+from .help_functions import *
 import random
 import math
 from keras import Model
-import numpy as np
 
 
 class TreeNode():
@@ -24,8 +23,14 @@ class TreeNode():
 
 
 class MCTS_CUBE():
-    def __init__(self, model: Model) -> None:
+    def __init__(self, model: Model, num_iterations_per_move = 20, v_value_threshold = 0.35) -> None:
         self.model = model
+        self.num_iterations_per_move = num_iterations_per_move
+        self.v_value_threshold = v_value_threshold
+        self.excluded_cube_state_str = None
+
+    def exclude_cube_state_for_next_round(self, cube: Cube) -> None:
+        self.excluded_cube_state_str = str(cube)
 
     def search(self, cube: Cube) -> str:
         """
@@ -39,16 +44,13 @@ class MCTS_CUBE():
         """
         self.root = TreeNode(cube=cube, parent=None, move_made=None)
 
-        for _ in range(10):
+        for _ in range(self.num_iterations_per_move):
             node = self.select(self.root)
             score = self.rollout(node.cube)
             self.backpropagate(node, score)
 
-        try:
-            return self.get_best_move(self.root, 0)
-        except:
-            return None
-    
+        return self.get_best_move(self.root, 0, print_score=True)
+
     def select(self, node: TreeNode) -> TreeNode:
         while not node.is_terminal:
             if node.is_fully_expanded:
@@ -70,12 +72,15 @@ class MCTS_CUBE():
 
                 return new_node
     
-    def get_best_move(self, node: TreeNode, exploration_constant: float):
+    def get_best_move(self, node: TreeNode, exploration_constant: float, print_score=False):
         best_score = float("-inf")
         best_moves = []
 
         # loop over child nodes of that node
         for child_node in node.children.values():
+            if str(child_node.cube) == self.excluded_cube_state_str:
+                continue
+
             # get move score using UCT1 formula
             move_score = child_node.score / child_node.visits + exploration_constant * math.sqrt(math.log(node.visits) / child_node.visits)
 
@@ -89,17 +94,24 @@ class MCTS_CUBE():
 
         # return one of the best moves randomly
         sampled_best_move = random.choice(best_moves)
+        if print_score:
+            print("Score for move:", best_score)
+
         return sampled_best_move
 
     def rollout(self, cube: Cube) -> float:
         # random moves until terminal state is reached (num_iterations in infinite game)
-        predicted_v_value = self.model.predict([flatten_one_hot(cube)])[0][0][0]
-        while predicted_v_value < 0.3:
-            cube = random.choice(get_children(cube))
-            predicted_v_value = self.model.predict([flatten_one_hot(cube)])[0][0][0]
-            print("It value:", predicted_v_value)
+        predicted_v_value = self.model.predict([flatten_one_hot(cube)], verbose=0)[0][0][0]
+        last_move = None
+        while predicted_v_value < self.v_value_threshold:
+            undo_move = get_undo_move(last_move)
+
+            move, cube = random.choice(get_children(cube, excluded_moves=[undo_move]))
+            predicted_v_value = self.model.predict([flatten_one_hot(cube)], verbose=0)[0][0][0]
             if predicted_v_value < 0:
                 return predicted_v_value
+            
+            last_move = move
 
         return predicted_v_value
 

@@ -1,9 +1,10 @@
 from pycuber import Cube
-from mcts import MCTS_CUBE
+from .mcts import MCTS_CUBE
 from keras import layers
 from keras.models import Model
 from keras.optimizers import Adam
 import keras.backend as K
+from typing import List
 
 
 def cube_is_solved(cube: Cube):
@@ -68,31 +69,25 @@ def build_model(learning_rate=1e-4):
     return model
 
 
-cube = Cube()
-cube = execute_sequence(cube, ["F", "L", "L"])
-cube_original = cube.copy()
+def solve_with_mcts(cube: Cube, model_weights_path: str, max_moves: int, num_iterations_per_move: int, v_value_threshold: int) -> List[str]:
+    model = build_model()
+    model.load_weights(model_weights_path)
 
-load_path = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/models/model.h5"
-model = build_model()
-model.load_weights(load_path)
+    mcts = MCTS_CUBE(model=model, num_iterations_per_move=num_iterations_per_move, v_value_threshold=v_value_threshold)
 
-mcts = MCTS_CUBE(model=model)
+    moves_to_make = []
+    for i in range(max_moves):
+        print(f"{i + 1}/{max_moves}")
+        move_node_obj = mcts.search(cube)
+        move = move_node_obj.move_made
 
-moves_to_make = []
+        mcts.exclude_cube_state_for_next_round(cube)
+        cube = cube(move)
+        moves_to_make.append(move)
+        print(f"Added move: {move}")
 
-move_node_obj = mcts.search(cube)
-move = move_node_obj.move_made
-cube = cube(move)
-moves_to_make.append(move)
+        if cube_is_solved(cube):
+            print("CUBE IS SOLVED!")
+            break
 
-move_node_obj = mcts.search(cube)
-move = move_node_obj.move_made
-cube = cube(move)
-moves_to_make.append(move)
-
-move_node_obj = mcts.search(cube)
-move = move_node_obj.move_made
-cube = cube(move)
-moves_to_make.append(move)
-
-print(moves_to_make)
+    return moves_to_make
