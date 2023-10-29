@@ -96,10 +96,10 @@ MIX_SEQUENCE_VERY_SHORT = ["F", "L", "L", "U"]
 
 MIX_SEQUENCE_MEDIUM_WILD = ["F'", "L", "L", "U", "B", "U'", "L", "R'"]
 
-cube = mcts_nn.execute_sequence(cube, MIX_SEQUENCE_MEDIUM_WILD)
+cube = mcts_nn.execute_sequence(cube, MIX_SEQUENCE_MEDIUM)
 cube_original = cube.copy()
 
-solution = mcts_nn.solve_with_mcts(cube, load_path, max_moves=500, num_iterations_per_move=50, iteration_limit_depth=20, init_v_value_threshold=10.0)
+solution = mcts_nn.solve_with_mcts(cube, load_path, max_moves=500, num_iterations_per_move=100, iteration_limit_depth=20, init_v_value_threshold=0.5)
 print("Solution:", solution)
 
 

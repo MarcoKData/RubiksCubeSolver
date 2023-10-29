@@ -118,14 +118,12 @@ class MCTS_CUBE():
         predicted_v_value, policy = self.model.predict([flatten_one_hot(cube)], verbose=0)
         predicted_v_value = predicted_v_value[0][0]
         policy = policy[0]
-        CONSIDER_BEST_N_FROM_POLICY = 3
-
-        last_move = None
-        counter = 0
 
         values = [predicted_v_value]
 
+        CONSIDER_BEST_N_FROM_POLICY = 3
         SLIDING_WINDOW_SIZE = 3
+        counter = 0
         if len(self.move_scores_history) >= SLIDING_WINDOW_SIZE:
             trailing_window = self.move_scores_history[-SLIDING_WINDOW_SIZE:]
             threshold = sum(trailing_window) / len(trailing_window)
@@ -135,14 +133,15 @@ class MCTS_CUBE():
                 print(f"Set v-value threshold to {threshold}")
 
         while predicted_v_value < self.v_value_threshold:
-            # undo_move = get_undo_move(last_move)
-
             idxes_to_consider = list(np.argpartition(list(policy), -CONSIDER_BEST_N_FROM_POLICY))[-CONSIDER_BEST_N_FROM_POLICY:]
+            values_for_idxes_to_consider = np.partition(list(policy), -CONSIDER_BEST_N_FROM_POLICY)[-CONSIDER_BEST_N_FROM_POLICY:]
+            values_for_idxes_to_consider = values_for_idxes_to_consider / values_for_idxes_to_consider.sum()
 
             all_children = get_children(cube)
             children_to_consider = [all_children[idx] for idx in idxes_to_consider]
 
-            _, cube = random.choice(children_to_consider)
+            idx_child_to_choose = np.random.choice(idxes_to_consider, p=values_for_idxes_to_consider)
+            _, cube = all_children[idx_child_to_choose]
 
             predicted_v_value, policy = self.model.predict([flatten_one_hot(cube)], verbose=0)
             predicted_v_value = predicted_v_value[0][0]
