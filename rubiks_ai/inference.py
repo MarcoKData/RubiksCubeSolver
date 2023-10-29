@@ -3,27 +3,47 @@ from .model import build_model
 import numpy as np
 
 
-def solve_cube(cube, model):
+def solve_cube(cube, model, use_probability_dist=False):
     max_steps_until_solved = 50
-    step_counter = 0
-    steps = []
     solved = False
-    while not cube_is_solved(cube) and step_counter < max_steps_until_solved:
-        step_counter += 1
-        flattened_cube = flatten_one_hot(cube)
-        _, p = model.predict([flattened_cube], verbose=0)
 
-        action = inv_action_map[np.argmax(p)]
-        steps.append(action)
-        cube(action)
-    
-    if step_counter < max_steps_until_solved:
-        solved = True
-    
-    if solved:
-        return steps, solved
-    else:
-        return [], solved
+    try_counter = 0
+    while not solved and try_counter < 5:
+        step_counter = 0
+        steps = []
+        try_counter += 1
+        print(f"Try number {try_counter}")
+        # Try to solve cube with fresh copy --> only useful if use_probability_dist = True
+        cube_copy = cube.copy()
+        while not cube_is_solved(cube_copy) and step_counter < max_steps_until_solved:
+            step_counter += 1
+            flattened_cube = flatten_one_hot(cube_copy)
+            _, policy = model.predict([flattened_cube], verbose=0)
+            policy = policy[0]
+
+            # Sample from policy with respect to probability distribution
+            randomly_sampled_value = np.random.choice(policy, p=policy)
+            probability_idx = np.where(policy == randomly_sampled_value)[0][0]
+
+            # Brute-Force highest value idx
+            highest_idx = np.argmax(policy)
+
+            if use_probability_dist:
+                idx_to_use = probability_idx
+            else:
+                idx_to_use = highest_idx
+
+            action = inv_action_map[idx_to_use]
+            steps.append(action)
+            cube_copy(action)
+
+        if step_counter < max_steps_until_solved:
+            solved = True
+        
+        if solved:
+            return steps, solved
+        else:
+            return [], solved
 
 
 def single_random_cube_solve(n_shuffles, model_path):
