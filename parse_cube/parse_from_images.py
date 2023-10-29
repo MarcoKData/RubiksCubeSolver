@@ -14,17 +14,26 @@ APPROX_COLORS = {
     "white": np.array([255, 255, 255])
 }
 
+APPROX_COLORS_2 = {
+    "red": np.array([200, 1, 200]),
+    "green": np.array([87, 187, 139]),
+    "blue": np.array([153, 187, 215]),
+    "yellow": np.array([255, 255, 104]),
+    "orange": np.array([255, 121, 137]),
+    "white": np.array([255, 255, 255])
+}
+
 # specific to image --> change when real setup done
 POSITIONS_MARKERS = [
-    (50, 50),
-    (50, 150),
-    (50, 250),
-    (150, 50),
-    (150, 150),
-    (150, 250),
-    (250, 50),
-    (250, 150),
-    (250, 250)
+    (100, 100),
+    (100, 300),
+    (100, 500),
+    (300, 100),
+    (300, 300),
+    (300, 500),
+    (500, 100),
+    (500, 300),
+    (500, 500)
 ]
 
 
@@ -37,7 +46,7 @@ def get_color_closest_to_pixel_value(pixel_value):
         pixel_value = pixel_value[:3]
     
     differences = {}
-    for color, px_baseline in APPROX_COLORS.items():
+    for color, px_baseline in APPROX_COLORS_2.items():
         diff = np.abs(px_baseline - pixel_value).mean()
         differences[color] = diff
     
