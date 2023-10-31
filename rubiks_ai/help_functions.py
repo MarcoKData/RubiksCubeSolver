@@ -100,10 +100,10 @@ def get_all_possible_actions_rewards_cube(cube):
 
     for action in action_map.keys():
         cube_copy = cube.copy()
-        cube_copy(action)
+        cube_copy = cube_copy(action)
         successor_cubes.append(flatten_one_hot(cube_copy))
-        successor_rewards.append(get_reward_for_cube(cube))
-    
+        successor_rewards.append(get_reward_for_cube(cube_copy))
+
     return successor_cubes, successor_rewards
 
 

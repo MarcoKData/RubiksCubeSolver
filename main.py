@@ -7,17 +7,18 @@ import pycuber as pc
 import monte_carlo_tree_search as mcts_nn
 
 
-load_path = os.path.join(".", "models", "model.h5")
+load_path = os.path.join(".", "models", "total_approach", "bugfix", "model.h5")
 
 # train the model
 """ai.train(
-    n_epochs=1,
+    n_epochs=50,
     n_iterations=20,
-    n_samples=5,
-    save_weights=False,
+    n_samples=20,
+    save_training_times_path="times.json",
+    save_weights=True,
     load_weights=False,
-    load_path=os.path.join(".", "models", "model.h5"),
-    save_path=os.path.join(".", "models", "model-save-path.h5")
+    load_path=os.path.join(".", "models", "total_approach", "bugfix", "model.h5"),
+    save_path=os.path.join(".", "models", "total_approach", "bugfix", "model.h5")
 )"""
 
 
@@ -86,7 +87,7 @@ else:
 
 
 # solve cube with mcts + nn
-cube = pc.Cube()
+"""cube = pc.Cube()
 
 MIX_SEQUENCE_BENCHMARK = ["F", "L", "L", "U", "B", "B", "L", "R", "U", "B", "L", "F", "R", "L", "B"]
 MIX_SEQUENCE_MEDIUM_PLUS = ["F", "L", "L", "U", "B", "B", "L", "R", "U", "B"]
@@ -96,11 +97,11 @@ MIX_SEQUENCE_VERY_SHORT = ["F", "L", "L", "U"]
 
 MIX_SEQUENCE_MEDIUM_WILD = ["F'", "L", "L", "U", "B", "U'", "L", "R'"]
 
-cube = mcts_nn.execute_sequence(cube, MIX_SEQUENCE_MEDIUM)
+cube = mcts_nn.execute_sequence(cube, MIX_SEQUENCE_SHORT)
 cube_original = cube.copy()
 
-solution = mcts_nn.solve_with_mcts(cube, load_path, max_moves=500, num_iterations_per_move=100, iteration_limit_depth=20, init_v_value_threshold=0.5)
-print("Solution:", solution)
+solution = mcts_nn.solve_with_mcts(cube, load_path, max_moves=500, num_iterations_per_move=50, iteration_limit_depth=20, init_v_value_threshold=0.5)
+print("Solution:", solution)"""
 
 
 # parse cube and apply given sequence
