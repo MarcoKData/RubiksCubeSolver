@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 import json
 from sklearn.model_selection import train_test_split
+from keras.callbacks import ModelCheckpoint
 
 
 def save_training_times(path, seconds_trained):
@@ -44,13 +45,25 @@ def train(
 
     print(f"X_train.shape, y_train.shape: {X_train.shape, y_train.shape}")
 
+    model_checkpoint = ModelCheckpoint(
+        filepath=save_path,
+        verbose=1,
+        save_best_only=True,
+        save_weights_only=True
+    )
+
+    callbacks = []
+    if save_weights:
+        callbacks = [model_checkpoint]
+
     model = build_model()
     model.fit(
         X_train,
         y_train,
         epochs=n_epochs,
         batch_size=n_samples_per_batch,
-        validation_data=(X_test, y_test)
+        validation_data=(X_test, y_test),
+        callbacks=callbacks
     )
 
     preds = model.predict(X_test)
