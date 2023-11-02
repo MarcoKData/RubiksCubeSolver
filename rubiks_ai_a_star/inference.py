@@ -1,5 +1,6 @@
 from .model import build_model
 from .help_functions import *
+from .graph import Graph
 
 
 def solve_random_cube(model_weights_path, shuffle_length=15):
@@ -11,25 +12,21 @@ def solve_random_cube(model_weights_path, shuffle_length=15):
     print("Randomly shuffled cube:")
     print(cube)
 
-    solving_sequence = []
-    last_move = None
+    graph = Graph(root=cube, model=model, take_best_n=2)
+
+    step_counter = 0
     while not cube_is_solved(cube):
-        print(f"Calculating step {len(solving_sequence) + 1}...")
-        children_moves = get_children_moves(cube)
-        children_scores = []
+        print(f"{step_counter + 1}...")
+        could_expand_node = graph.expand_layer()
+        print(graph)
+        if graph.cube_is_solved() or not could_expand_node:
+            break
 
-        reverse_last_move = get_reverse_move(last_move)
-        for child, move in children_moves:
-            if move != reverse_last_move:
-                score = model.predict([flatten_one_hot(child)], verbose=0)
-                children_scores.append((child, move, score))
+        step_counter += 1
 
-        children_scores.sort(key=lambda t: t[2])
-        move_to_take = children_scores[0][1]
-        print(f"Score new Move {move_to_take}: {children_scores[0][2][0][0]}")
-        cube = cube(move_to_take)
-        solving_sequence.append(move_to_take)
-        last_move = move_to_take
-
-    print("Cube is solved!")
-    print(f"Sequence: {solving_sequence}")
+    if could_expand_node:
+        print("\n\nCube is solved!")
+        solving_sequence = graph.get_solving_sequence()
+        print(f"Solving sequence: {solving_sequence}")
+    else:
+        print("\n\nCould not solve Cube!")
