@@ -12,7 +12,7 @@ def solve_random_cube(model_weights_path, shuffle_length=15):
     print("Randomly shuffled cube:")
     print(cube)
 
-    graph = Graph(root=cube, model=model, take_best_n=2)
+    graph = Graph(root=cube, model=model, take_best_n=2, max_living_leafs=3)
 
     step_counter = 0
     while not cube_is_solved(cube):

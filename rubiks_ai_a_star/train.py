@@ -36,25 +36,21 @@ def train(
         print("Skipped loading Model Weights.")
 
     cubes = []
-    steps_until_solved = []
     cubes, distances = generate_cube_sequences(n_samples=n_batches, sequence_length=n_samples_per_batch)
     cubes_fully_flattened = np.array([flatten_one_hot(cube) for cube in cubes])
     distances = np.array(distances)
 
-    X_train, X_test, y_train, y_test = train_test_split(cubes_fully_flattened, distances, test_size=0.3, random_state=187)
+    cubes_test, distances_test = generate_cube_sequences(n_samples=50, sequence_length=32)
+    cubes_test_fully_flattened = np.array([flatten_one_hot(cube) for cube in cubes_test])
+    distances_test = np.array(distances_test)
+
+    # X_train, X_test, y_train, y_test = train_test_split(cubes_fully_flattened, distances, test_size=0.3, random_state=187)
+    X_train = cubes_fully_flattened
+    y_train = distances
+    X_test = cubes_test_fully_flattened
+    y_test = distances_test
 
     print(f"X_train.shape, y_train.shape: {X_train.shape, y_train.shape}")
-
-    model_checkpoint = ModelCheckpoint(
-        filepath=save_path,
-        verbose=1,
-        save_best_only=True,
-        save_weights_only=True
-    )
-
-    callbacks = []
-    if save_weights:
-        callbacks = [model_checkpoint]
 
     model = build_model()
     model.fit(
@@ -62,11 +58,9 @@ def train(
         y_train,
         epochs=n_epochs,
         batch_size=n_samples_per_batch,
-        validation_data=(X_test, y_test),
-        callbacks=callbacks
+        validation_data=(X_test, y_test)
     )
 
-    preds = model.predict(X_test)
-    preds = [pred[0] for pred in preds]
-    print("preds first 10:", preds[:10])
-    print("y_test fiorst 10:", y_test[:10])
+    model.evaluate(X_test, y_test)
+    if save_weights:
+        model.save_weights(save_path)

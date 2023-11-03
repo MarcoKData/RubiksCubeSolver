@@ -1,12 +1,12 @@
 import rubiks_ai_a_star as ai
 
 
-MODEL_PATH = "./models/a_star/model.h5"
+MODEL_PATH = "./models/a_star/model_one_run.h5"
 
-"""for i in range(100):
+"""while True:
     ai.train(
-        n_batches=250,
-        n_samples_per_batch=16,
+        n_batches=500,
+        n_samples_per_batch=32,
         n_epochs=15,
         save_training_times_path="./times.json",
         save_weights=True,
@@ -17,5 +17,5 @@ MODEL_PATH = "./models/a_star/model.h5"
 
 ai.solve_random_cube(
     model_weights_path=MODEL_PATH,
-    shuffle_length=5
+    shuffle_length=10
 )
