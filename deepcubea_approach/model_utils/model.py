@@ -3,8 +3,8 @@ from keras.models import Model
 from keras.optimizers import Adam
 
 
-def build_model(learning_rate=1e-4):
-    inputs = layers.Input(shape=(324,))  # 324 because of maximally flattened cube-grid (one-hot for colors)
+def build_model(learning_rate=1e-3):
+    inputs = layers.Input(shape=(324,))
 
     x = layers.Dense(1024)(inputs)
     x = layers.LeakyReLU()(x)
@@ -18,7 +18,7 @@ def build_model(learning_rate=1e-4):
     x = layers.Dense(50)(x)
     x = layers.LeakyReLU()(x)
 
-    outputs = layers.Dense(12, activation="softmax")(x)
+    outputs = layers.Dense(1)(x)
 
     model = Model(
         inputs=inputs,
@@ -26,10 +26,8 @@ def build_model(learning_rate=1e-4):
     )
 
     model.compile(
-        optimizer=Adam(learning_rate=learning_rate),
-        loss="categorical_crossentropy"
+        loss="mae",
+        optimizer=Adam(learning_rate=learning_rate)
     )
-
-    # model.summary()
 
     return model
