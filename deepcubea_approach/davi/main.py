@@ -2,9 +2,11 @@ import model_utils as m_utils
 import data_utils as d_utils
 import data_utils as data
 import numpy as np
+from datetime import datetime
+import json
 
 
-def train(batch_size: int, max_num_scrambles: int, training_iterations: int, convergence_check_freq: int, error_threshold: float, model_path: str = None, load_model_weights: bool = False) -> None:
+def train(batch_size: int, max_num_scrambles: int, training_iterations: int, convergence_check_freq: int, error_threshold: float, model_path: str = None, path_training_times: str = None, load_model_weights: bool = False) -> None:
     model_learn = m_utils.build_model()
     model_improve = m_utils.build_model()
 
@@ -13,6 +15,7 @@ def train(batch_size: int, max_num_scrambles: int, training_iterations: int, con
         model_improve.load_weights(model_path)
 
     for m in range(training_iterations):
+        t0 = datetime.now()
         print(f"\n\n######## {m + 1}/{training_iterations} ########\n")
         X_cubes = data.get_scrambled_cubes(batch_size, max_num_scrambles)
         X, y = [], []
@@ -43,3 +46,17 @@ def train(batch_size: int, max_num_scrambles: int, training_iterations: int, con
         if ((m + 1) % convergence_check_freq == 0) and (loss < error_threshold):
             model_improve.set_weights(model_learn.get_weights())
             print("Updated models!")
+        
+        t1 = datetime.now()
+        dt = (t1 - t0).total_seconds()
+
+        if path_training_times is not None:
+            with open(path_training_times, "r") as file:
+                times = json.load(file)
+            
+            times.append(dt)
+
+            with open(path_training_times, "w") as file:
+                file.write(json.dumps(times, indent=4))
+            
+            print("Saved times successfully!")

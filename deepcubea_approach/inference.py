@@ -18,5 +18,6 @@ while True:
 
     solved_n_shuffles.append(n_shuffles)
     n_shuffles += 1
+    print(f"Sequence: {sequence}")
 
 print(f"Solved n_shuffles: {solved_n_shuffles}")
