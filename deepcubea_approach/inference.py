@@ -3,7 +3,7 @@ import data_utils as data
 import model_utils as m_utils
 
 
-model = m_utils.build_model()
+model = m_utils.build_model_residual()
 model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/model_copy.h5")
 
 solved_n_shuffles = []

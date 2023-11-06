@@ -4,11 +4,13 @@ import data_utils as data
 import numpy as np
 from datetime import datetime
 import json
+import time
+import shutil
 
 
-def train(batch_size: int, max_num_scrambles: int, training_iterations: int, convergence_check_freq: int, error_threshold: float, model_path: str = None, path_training_times: str = None, load_model_weights: bool = False) -> None:
-    model_learn = m_utils.build_model()
-    model_improve = m_utils.build_model()
+def train(batch_size: int, max_num_scrambles: int, training_iterations: int, convergence_check_freq: int, error_threshold: float, model_path: str = None, model_backup_path: str = None, path_training_times: str = None, load_model_weights: bool = False) -> None:
+    model_learn = m_utils.build_model_residual()
+    model_improve = m_utils.build_model_residual()
 
     if model_path is not None and load_model_weights:
         model_learn.load_weights(model_path)
@@ -39,11 +41,15 @@ def train(batch_size: int, max_num_scrambles: int, training_iterations: int, con
         if model_path is not None:
             model_learn.save_weights(model_path)
             print("Saved model!")
+            time.sleep(1.0)
+            if model_backup_path is not None:
+                shutil.copyfile(model_path, model_backup_path)
+                print("## Copied model to backup file! ##")
 
         print(m + 1, convergence_check_freq, (m + 1) % convergence_check_freq == 0)
         print(loss, error_threshold, loss < error_threshold)
 
-        if ((m + 1) % convergence_check_freq == 0) and (loss < error_threshold):
+        if (m + 1) % convergence_check_freq == 0:
             model_improve.set_weights(model_learn.get_weights())
             print("Updated models!")
         
@@ -60,3 +66,7 @@ def train(batch_size: int, max_num_scrambles: int, training_iterations: int, con
                 file.write(json.dumps(times, indent=4))
             
             print("Saved times successfully!")
+        
+        if (m + 1) % 10 == 0:
+            m_utils.test_deviation_single_cubes()
+            print("#### Tested Deviation on Single Cubes! ####")
