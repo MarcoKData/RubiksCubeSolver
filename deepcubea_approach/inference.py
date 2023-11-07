@@ -1,12 +1,14 @@
 import inference
 import data_utils as data
 import model_utils as m_utils
+import numpy as np
 
 
 model = m_utils.build_model_residual()
 model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/model_copy.h5")
 
 solved_n_shuffles = []
+solution_lens = []
 n_shuffles = 1
 while True:
     print(f"Testing n_shuffles: {n_shuffles}")
@@ -17,7 +19,12 @@ while True:
         break
 
     solved_n_shuffles.append(n_shuffles)
+    solution_lens.append(len(sequence))
     n_shuffles += 1
     print(f"Sequence: {sequence}")
 
-print(f"Solved n_shuffles: {solved_n_shuffles}")
+solution_lens = np.array(solution_lens)
+
+print(f"\nSolved up to n_shuffles = {n_shuffles}")
+print(f"solution lens: {solution_lens}")
+print(f"Maximum solution length: {solution_lens.max()}")

@@ -10,6 +10,6 @@ def predict_cost_to_go_from_cube(cube: Cube, model: Model) -> float:
 
     cube_flattened = data.flatten_one_hot(cube)
     cube_flattened = cube_flattened.reshape((1, -1))
-    pred = model.predict(cube_flattened, verbose=0)[0][0]
+    pred = model(cube_flattened).numpy()[0][0]
 
     return pred

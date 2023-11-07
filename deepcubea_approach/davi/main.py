@@ -6,9 +6,21 @@ from datetime import datetime
 import json
 import time
 import shutil
+import gc
 
 
-def train(batch_size: int, max_num_scrambles: int, training_iterations: int, convergence_check_freq: int, error_threshold: float, model_path: str = None, model_backup_path: str = None, path_training_times: str = None, load_model_weights: bool = False) -> None:
+def train(
+    batch_size: int,
+    max_num_scrambles: int,
+    training_iterations: int,
+    convergence_check_freq: int,
+    error_threshold: float,
+    model_path: str = None,
+    model_backup_path: str = None,
+    path_training_times: str = None,
+    path_to_training_times_metrics: str = None,
+    load_model_weights: bool = False
+) -> None:
     model_learn = m_utils.build_model_residual()
     model_improve = m_utils.build_model_residual()
 
@@ -27,7 +39,7 @@ def train(batch_size: int, max_num_scrambles: int, training_iterations: int, con
             if (i + 1) % int(len_X_cubes * 0.2) == 0 or i == 0:
                 print(f"{i + 1}/{len_X_cubes}...")
             value = m_utils.get_updated_cost_to_go_value(cube, model_improve)
-            
+
             y.append(value)
             X.append(d_utils.flatten_one_hot(cube))
         
@@ -52,7 +64,7 @@ def train(batch_size: int, max_num_scrambles: int, training_iterations: int, con
         if (m + 1) % convergence_check_freq == 0:
             model_improve.set_weights(model_learn.get_weights())
             print("Updated models!")
-        
+
         t1 = datetime.now()
         dt = (t1 - t0).total_seconds()
 
@@ -68,5 +80,9 @@ def train(batch_size: int, max_num_scrambles: int, training_iterations: int, con
             print("Saved times successfully!")
         
         if (m + 1) % 10 == 0:
-            m_utils.test_deviation_single_cubes()
+            m_utils.test_deviation_single_cubes(
+                path_to_model=model_backup_path,
+                path_to_times=path_training_times,
+                path_to_times_metrics=path_to_training_times_metrics
+            )
             print("#### Tested Deviation on Single Cubes! ####")

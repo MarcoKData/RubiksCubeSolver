@@ -5,14 +5,19 @@ import data_utils as data
 from .predict import predict_cost_to_go_from_cube
 
 
+def get_inverse_action(action: str) -> str:
+    return (action + "'").replace("''", "")
+
+
 def get_updated_cost_to_go_value(cube: Cube, model: Model) -> float:
-    all_child_values = []
+    min_pred_cost_to_go = 999_999
 
     for action in data.ACTIONS:
-        cube_copy = cube.copy()
-        cube_copy(action)
-        predicted_cost_to_go_successor = predict_cost_to_go_from_cube(cube_copy, model)
+        cube(action)
+        predicted_cost_to_go_successor = predict_cost_to_go_from_cube(cube, model)
+        cube(get_inverse_action(action))
 
-        all_child_values.append(predicted_cost_to_go_successor + 1)
+        if predicted_cost_to_go_successor < min_pred_cost_to_go:
+            min_pred_cost_to_go = predicted_cost_to_go_successor
 
-    return np.min(all_child_values)
+    return min_pred_cost_to_go + 1

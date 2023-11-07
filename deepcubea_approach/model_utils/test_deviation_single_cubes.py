@@ -22,11 +22,11 @@ def test_deviation_single_cubes(
     preds = []
     y_true = []
     for n_shuffles in range(n_shuffles_lower, n_shuffles_upper + 1):
-        for i in range(iterations_per_n_shuffles):
+        for _ in range(iterations_per_n_shuffles):
             sample_cube = data.get_single_scrambled_cube(num_scrambles=n_shuffles)
             sample_cube = data.flatten_one_hot(sample_cube).reshape((1, -1))
 
-            pred = model.predict(sample_cube, verbose=0)[0][0]
+            pred = model(sample_cube).numpy()[0][0]
 
             preds.append(pred)
             y_true.append(n_shuffles)

@@ -77,7 +77,7 @@ def solve_with_a_star(start_cube: Cube, model: Model, max_num_iterations: int = 
 
             node_child.g = current_node.g + 1
             cube_to_pred = data.flatten_one_hot(node_child.cube).reshape((1, -1))
-            node_child.h = model.predict(cube_to_pred, verbose=0)[0][0]
+            node_child.h = model(cube_to_pred).numpy()[0][0]
             node_child.f = node_child.g + node_child.h
 
             for node in graph.open:
