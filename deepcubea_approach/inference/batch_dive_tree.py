@@ -2,6 +2,7 @@ from pycuber import Cube
 import rubiks_utils as r_utils
 import data_utils as data
 from keras import Model
+import numpy as np
 
 
 class BatchDiveNode():
@@ -55,12 +56,11 @@ class BatchDiveTree():
 
     def score_leafs(self):
         leafs = [node for node in self.nodes if node.is_leaf]
-        for node in leafs:
-            if r_utils.is_final_cube_state(node.cube):
-                return node
 
-            score = self.model(data.flatten_one_hot(node.cube).reshape((1, -1))).numpy()[0][0]
-            node.cost_to_go = score
+        flattened_leafs = np.array([data.flatten_one_hot(node.cube) for node in leafs])
+        preds = self.model.predict(flattened_leafs, verbose=0)
+        for i in range(len(leafs)):
+            leafs[i].cost_to_go = preds[i][0]
 
         leafs.sort(key=lambda leaf: leaf.cost_to_go)
         best_leaf = leafs[0]

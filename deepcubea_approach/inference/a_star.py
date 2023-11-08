@@ -39,11 +39,10 @@ class AStarGraph():
 
 
 
-def solve_with_batch_dive(start_cube: Cube, model: Model, max_num_iterations: int = 999_999) -> List:
+def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, prune_to_best_n: int = 3, max_num_iterations: int = 999_999) -> List:
     tree = BatchDiveTree(model)
     tree.add_root(start_cube)
 
-    BATCH_DEPTH = 3
     is_solved = False
     it_counter = 0
     while not is_solved:
@@ -51,8 +50,8 @@ def solve_with_batch_dive(start_cube: Cube, model: Model, max_num_iterations: in
         if it_counter >= max_num_iterations:
             break
 
-        for i in range(BATCH_DEPTH):
-            print(f"Expanding {i + 1}/{BATCH_DEPTH}!")
+        for i in range(batch_depth):
+            print(f"Expanding {i + 1}/{batch_depth}!")
             found_final = tree.expand_layer()
             if found_final:
                 break
@@ -63,7 +62,7 @@ def solve_with_batch_dive(start_cube: Cube, model: Model, max_num_iterations: in
         is_solved = r_utils.is_final_cube_state(best_leaf.cube)
         if is_solved:
             return tree.get_path_to_node(best_leaf)
-        tree.prune_tree_to_best_n_leafs(n=3)
+        tree.prune_tree_to_best_n_leafs(n=prune_to_best_n)
 
         it_counter += 1
 

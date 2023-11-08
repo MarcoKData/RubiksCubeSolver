@@ -16,14 +16,10 @@ cube("D")
 cube("U'")
 cube("R'")
 cube("L")
-cube("U")
-cube("D")
-cube("U'")
-cube("R'")
 
 print(cube)
 
-sequence = inference.solve_with_batch_dive(cube, model, max_num_iterations=50)
+sequence = inference.solve_with_batch_dive(cube, model, max_num_iterations=50, batch_depth=3, prune_to_best_n=2)
 print("Sequence:", sequence)
 for move in sequence:
     cube(move)
