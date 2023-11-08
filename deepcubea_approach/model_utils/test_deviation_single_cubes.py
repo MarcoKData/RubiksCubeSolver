@@ -16,7 +16,7 @@ def test_deviation_single_cubes(
     n_shuffles_lower: int = 3,
     n_shuffles_upper: int = 15
 ):
-    model = m_utils.build_model_residual()
+    model = m_utils.build_model()
     model.load_weights(path_to_model)
 
     preds = []

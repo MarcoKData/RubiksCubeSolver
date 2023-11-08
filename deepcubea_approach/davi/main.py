@@ -6,7 +6,6 @@ from datetime import datetime
 import json
 import time
 import shutil
-import gc
 
 
 def train(
@@ -21,8 +20,8 @@ def train(
     path_to_training_times_metrics: str = None,
     load_model_weights: bool = False
 ) -> None:
-    model_learn = m_utils.build_model_residual()
-    model_improve = m_utils.build_model_residual()
+    model_learn = m_utils.build_model()
+    model_improve = m_utils.build_model()
 
     if model_path is not None and load_model_weights:
         model_learn.load_weights(model_path)
@@ -36,6 +35,7 @@ def train(
 
         len_X_cubes = len(X_cubes)
         for i, cube in enumerate(X_cubes):
+            time.sleep(0.1)
             if (i + 1) % int(len_X_cubes * 0.2) == 0 or i == 0:
                 print(f"{i + 1}/{len_X_cubes}...")
             value = m_utils.get_updated_cost_to_go_value(cube, model_improve)
@@ -45,6 +45,7 @@ def train(
         
         X = np.array(X)
         y = np.array(y)
+        print("Mean y for training:", y.mean())
 
         hist = model_learn.fit(X, y, epochs=1, verbose=0)
         loss = hist.history["loss"][-1]
@@ -79,7 +80,7 @@ def train(
             
             print("Saved times successfully!")
         
-        if (m + 1) % 10 == 0:
+        if (m + 1) % convergence_check_freq == 0:
             m_utils.test_deviation_single_cubes(
                 path_to_model=model_backup_path,
                 path_to_times=path_training_times,

@@ -73,3 +73,7 @@ def build_model_residual(learning_rate=1e-3):
     )
 
     return model
+
+
+def build_model(learning_rate=1e-3):
+    return build_model_simple(learning_rate)
