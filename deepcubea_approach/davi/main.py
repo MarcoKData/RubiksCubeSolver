@@ -35,7 +35,7 @@ def train(
 
         len_X_cubes = len(X_cubes)
         for i, cube in enumerate(X_cubes):
-            time.sleep(0.1)
+            time.sleep(0.02)
             if (i + 1) % int(len_X_cubes * 0.2) == 0 or i == 0:
                 print(f"{i + 1}/{len_X_cubes}...")
             value = m_utils.get_updated_cost_to_go_value(cube, model_improve)

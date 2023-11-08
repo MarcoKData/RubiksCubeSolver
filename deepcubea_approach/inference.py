@@ -5,7 +5,7 @@ import numpy as np
 
 
 model = m_utils.build_model()
-model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/model_copy.h5")
+model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/model.h5")
 
 solved_n_shuffles = []
 solution_lens = []

@@ -1,8 +1,8 @@
 from keras.models import Model
-import numpy as np
 from pycuber import Cube
 import rubiks_utils as r_utils
 import data_utils as data
+from .batch_dive_tree import BatchDiveNode, BatchDiveTree
 from typing import List
 
 
@@ -36,6 +36,38 @@ class AStarGraph():
                 temp.append(node_it)
         
         self.open = temp
+
+
+
+def solve_with_batch_dive(start_cube: Cube, model: Model, max_num_iterations: int = 999_999) -> List:
+    tree = BatchDiveTree(model)
+    tree.add_root(start_cube)
+
+    BATCH_DEPTH = 3
+    is_solved = False
+    it_counter = 0
+    while not is_solved:
+        print(f"{it_counter + 1} (max {max_num_iterations})...")
+        if it_counter >= max_num_iterations:
+            break
+
+        for i in range(BATCH_DEPTH):
+            print(f"Expanding {i + 1}/{BATCH_DEPTH}!")
+            found_final = tree.expand_layer()
+            if found_final:
+                break
+
+        print("Scoring leafs...")
+        best_leaf = tree.score_leafs()
+        print(f"Best leaf's score: {best_leaf.cost_to_go}")
+        is_solved = r_utils.is_final_cube_state(best_leaf.cube)
+        if is_solved:
+            return tree.get_path_to_node(best_leaf)
+        tree.prune_tree_to_best_n_leafs(n=3)
+
+        it_counter += 1
+
+    return []
 
 
 def solve_with_a_star(start_cube: Cube, model: Model, max_num_iterations: int = 999_999) -> List:
