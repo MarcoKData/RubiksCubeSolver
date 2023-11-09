@@ -52,16 +52,16 @@ def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, 
 
         for i in range(batch_depth):
             print(f"Expanding {i + 1}/{batch_depth}!")
-            found_final = tree.expand_layer()
-            if found_final:
+            is_solved = tree.expand_layer()
+            if is_solved:
                 break
 
         print("Scoring leafs...")
-        best_leaf = tree.score_leafs()
-        print(f"Best leaf's score: {best_leaf.cost_to_go}")
-        is_solved = r_utils.is_final_cube_state(best_leaf.cube)
+        best_leaf = tree.score_leafs(one_is_solved=is_solved)
         if is_solved:
             return tree.get_path_to_node(best_leaf)
+
+        print(f"Best leaf's score: {best_leaf.cost_to_go}")
         tree.prune_tree_to_best_n_leafs(n=prune_to_best_n)
 
         it_counter += 1

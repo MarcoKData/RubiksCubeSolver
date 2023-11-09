@@ -54,8 +54,12 @@ class BatchDiveTree():
             self.next_node_id += 1
         node.is_leaf = False
 
-    def score_leafs(self):
+    def score_leafs(self, one_is_solved=False):
         leafs = [node for node in self.nodes if node.is_leaf]
+        if one_is_solved:
+            for leaf in leafs:
+                if r_utils.is_final_cube_state(leaf.cube):
+                    return leaf
 
         flattened_leafs = np.array([data.flatten_one_hot(node.cube) for node in leafs])
         preds = self.model.predict(flattened_leafs, verbose=0)
