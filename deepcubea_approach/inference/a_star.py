@@ -2,7 +2,7 @@ from keras.models import Model
 from pycuber import Cube
 import rubiks_utils as r_utils
 import data_utils as data
-from .batch_dive_tree import BatchDiveNode, BatchDiveTree
+from .batch_dive_tree import BatchDiveTree
 from typing import List
 
 
@@ -39,7 +39,7 @@ class AStarGraph():
 
 
 
-def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, prune_to_best_n: int = 3, max_num_iterations: int = 999_999) -> List:
+def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, prune_to_best_n: int = 3, width_per_layer: int = 5, max_num_iterations: int = 999_999) -> List:
     tree = BatchDiveTree(model)
     tree.add_root(start_cube)
 
@@ -52,13 +52,16 @@ def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, 
 
         for i in range(batch_depth):
             print(f"Expanding {i + 1}/{batch_depth}!")
-            is_solved = tree.expand_layer()
+            is_solved = tree.expand_layer(width_to_expand=width_per_layer)
             if is_solved:
                 break
 
         print("Scoring leafs...")
         best_leaf = tree.score_leafs(one_is_solved=is_solved)
         if is_solved:
+            """for node in tree.nodes:
+                print(node.cube, node.id, node.cost_to_go, node.how_did_i_get_here, node.is_root, node.parent_id)
+                print("NEXT NODE")"""
             return tree.get_path_to_node(best_leaf)
 
         print(f"Best leaf's score: {best_leaf.cost_to_go}")

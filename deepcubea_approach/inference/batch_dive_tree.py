@@ -39,25 +39,39 @@ class BatchDiveTree():
         node.is_root = True
         self.nodes.append(node)
         self.root = node
+        self.next_node_id += 1
 
-    def expand_layer(self):
+    def expand_layer(self, width_to_expand: int):
         leafs = [node for node in self.nodes if node.is_leaf]
         for node in leafs:
             if r_utils.is_final_cube_state(node.cube):
-                print("is final")
                 return True
 
-            self.expand_node(node)
+            self.expand_node(node, width_to_expand)
 
         return False
 
-    def expand_node(self, node: BatchDiveNode):
+    def expand_node(self, node: BatchDiveNode, width_to_expand: int):
         children = r_utils.get_children(node.cube)
-        for move, child in children:
+        idx_solved = None
+        for i, (_, c) in enumerate(children):
+            if r_utils.is_final_cube_state(c):
+                idx_solved = i
+
+        children_cubes_flattened = np.array([data.flatten_one_hot(cube) for _, cube in children])  # (12, 324)
+        preds = np.array([pred[0] for pred in self.model(children_cubes_flattened).numpy()])
+        if idx_solved is not None:
+            preds[idx_solved] = -999_999
+
+        smallest_indices = preds.argsort()[:width_to_expand]
+        children = [(children[idx], preds[idx]) for idx in smallest_indices]
+
+        for (move, child), cost_to_go in children:
             if move == r_utils.get_reversed_action(node.how_did_i_get_here):
                 continue
 
             new_node = BatchDiveNode(id_value=self.next_node_id, cube=child, parent_id=node.id, how_did_i_get_here=move)
+            new_node.cost_to_go = cost_to_go
             self.nodes.append(new_node)
             self.next_node_id += 1
         node.is_leaf = False
@@ -65,15 +79,18 @@ class BatchDiveTree():
     def score_leafs(self, one_is_solved=False):
         leafs = [node for node in self.nodes if node.is_leaf]
         if one_is_solved:
-            for leaf in leafs:
-                if r_utils.is_final_cube_state(leaf.cube):
-                    return leaf
+            for i in range(len(leafs)):
+                if r_utils.is_final_cube_state(leafs[i].cube):
+                    leafs[i].cost_to_go = -999_999
+                    return leafs[i]
 
         flattened_leafs = np.array([data.flatten_one_hot(node.cube) for node in leafs])
         preds = self.model.predict(flattened_leafs, verbose=0)
         for i in range(len(leafs)):
             c = leafs[i].cube
-            if str(c) in self.str_cubes_one_shuffle:
+            if r_utils.is_final_cube_state(c):
+                cost_to_go_value = -999_999
+            elif str(c) in self.str_cubes_one_shuffle:
                 cost_to_go_value = 1
             elif str(c) in self.str_cubes_two_shuffles:
                 cost_to_go_value = 2

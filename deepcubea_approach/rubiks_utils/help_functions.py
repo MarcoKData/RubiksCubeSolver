@@ -36,5 +36,5 @@ def get_children(cube: pc.Cube, excluded_moves = []):
     for move in moves_to_use:
         cube_copy = cube.copy()
         children.append((move, cube_copy(move)))
-    
+
     return children

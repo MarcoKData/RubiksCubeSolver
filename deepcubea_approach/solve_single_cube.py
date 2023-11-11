@@ -9,20 +9,26 @@ PATH_MODEL = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcube
 model = m_utils.build_model()
 model.load_weights(PATH_MODEL)
 
-"""cube = pc.Cube()
+cube = pc.Cube()
+cube("D")
+cube("R")
+cube("B'")
+cube("R'")
+cube("R'")
 cube("F")
 cube("R")
-cube("D")
-cube("U'")
+cube("B'")
 cube("R'")
-cube("L")
+cube("R'")
 cube("R")
-cube("D")"""
+cube("B'")
+cube("R'")
+cube("F")
 
-cube = data.get_single_scrambled_cube(num_scrambles=10)
+# cube = data.get_single_scrambled_cube(num_scrambles=6)
 print(cube)
 
-sequence = inference.solve_with_batch_dive(cube, model, max_num_iterations=50, batch_depth=3, prune_to_best_n=2)
+sequence = inference.solve_with_batch_dive(cube, model, max_num_iterations=50, batch_depth=5, prune_to_best_n=2, width_per_layer=3)
 print("Sequence:", sequence)
 for move in sequence:
     cube(move)
