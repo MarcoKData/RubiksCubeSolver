@@ -14,7 +14,14 @@ while True:
     print(f"Testing n_shuffles: {n_shuffles}")
     cube = data.get_single_scrambled_cube(num_scrambles=n_shuffles)
 
-    sequence = inference.solve_with_a_star(cube, model, max_num_iterations=30)
+    # sequence = inference.solve_with_a_star(cube, model, max_num_iterations=30)
+    sequence = inference.solve_with_batch_dive(
+        start_cube=cube,
+        model=model,
+        batch_depth=4,
+        prune_to_best_n=2,
+        width_per_layer=5
+    )
     if sequence is None:
         break
 

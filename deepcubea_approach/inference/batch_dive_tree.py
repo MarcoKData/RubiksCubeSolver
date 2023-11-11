@@ -76,33 +76,12 @@ class BatchDiveTree():
             self.next_node_id += 1
         node.is_leaf = False
 
-    def score_leafs(self, one_is_solved=False):
+    def get_best_leaf(self):
         leafs = [node for node in self.nodes if node.is_leaf]
-        if one_is_solved:
-            for i in range(len(leafs)):
-                if r_utils.is_final_cube_state(leafs[i].cube):
-                    leafs[i].cost_to_go = -999_999
-                    return leafs[i]
-
-        flattened_leafs = np.array([data.flatten_one_hot(node.cube) for node in leafs])
-        preds = self.model.predict(flattened_leafs, verbose=0)
-        for i in range(len(leafs)):
-            c = leafs[i].cube
-            if r_utils.is_final_cube_state(c):
-                cost_to_go_value = -999_999
-            elif str(c) in self.str_cubes_one_shuffle:
-                cost_to_go_value = 1
-            elif str(c) in self.str_cubes_two_shuffles:
-                cost_to_go_value = 2
-            else:
-                cost_to_go_value = preds[i][0] + np.random.rand() / 1_000
-
-            leafs[i].cost_to_go = cost_to_go_value
-
         leafs.sort(key=lambda leaf: leaf.cost_to_go)
-        best_leaf = leafs[0]
+        
+        return leafs[0]
 
-        return best_leaf
     
     def get_node_by_id(self, id_value: int):
         for node in self.nodes:

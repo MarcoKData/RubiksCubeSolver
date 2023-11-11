@@ -57,7 +57,7 @@ def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, 
                 break
 
         print("Scoring leafs...")
-        best_leaf = tree.score_leafs(one_is_solved=is_solved)
+        best_leaf = tree.get_best_leaf()
         if is_solved:
             """for node in tree.nodes:
                 print(node.cube, node.id, node.cost_to_go, node.how_did_i_get_here, node.is_root, node.parent_id)
