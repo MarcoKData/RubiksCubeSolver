@@ -25,6 +25,14 @@ class BatchDiveTree():
         self.nodes = []
         self.model = model
         self.root = None
+        self.former_best_leafs = []
+
+        cube = Cube()
+        first_children = r_utils.get_children(cube)
+        self.str_cubes_one_shuffle = [str(c) for _, c in first_children]
+        self.str_cubes_two_shuffles = []
+        for _, cube_one_shuffle in first_children:
+            self.str_cubes_two_shuffles += [str(c) for _, c in r_utils.get_children(cube_one_shuffle)]
 
     def add_root(self, cube: BatchDiveNode):
         node = BatchDiveNode(id_value=self.next_node_id, cube=cube, parent_id=None, how_did_i_get_here=None)
@@ -46,7 +54,7 @@ class BatchDiveTree():
     def expand_node(self, node: BatchDiveNode):
         children = r_utils.get_children(node.cube)
         for move, child in children:
-            if move == node.how_did_i_get_here:
+            if move == r_utils.get_reversed_action(node.how_did_i_get_here):
                 continue
 
             new_node = BatchDiveNode(id_value=self.next_node_id, cube=child, parent_id=node.id, how_did_i_get_here=move)
@@ -64,7 +72,15 @@ class BatchDiveTree():
         flattened_leafs = np.array([data.flatten_one_hot(node.cube) for node in leafs])
         preds = self.model.predict(flattened_leafs, verbose=0)
         for i in range(len(leafs)):
-            leafs[i].cost_to_go = preds[i][0]
+            c = leafs[i].cube
+            if str(c) in self.str_cubes_one_shuffle:
+                cost_to_go_value = 1
+            elif str(c) in self.str_cubes_two_shuffles:
+                cost_to_go_value = 2
+            else:
+                cost_to_go_value = preds[i][0] + np.random.rand() / 1_000
+
+            leafs[i].cost_to_go = cost_to_go_value
 
         leafs.sort(key=lambda leaf: leaf.cost_to_go)
         best_leaf = leafs[0]
@@ -88,12 +104,13 @@ class BatchDiveTree():
         return path
     
     def prune_tree_to_best_n_leafs(self, n: int):
-        all_leafs = [node for node in self.nodes if node.is_leaf]
+        all_leafs = [node for node in self.nodes if node.is_leaf and node not in self.former_best_leafs]
         all_leafs.sort(key=lambda node: node.cost_to_go)
 
         best_n = all_leafs[:n]
         remaining_nodes = [self.root]
         for node in best_n:
+            self.former_best_leafs.append(node)
             node_it = node
             node_path = [node_it]
 

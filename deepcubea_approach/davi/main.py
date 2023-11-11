@@ -35,7 +35,7 @@ def train(
 
         len_X_cubes = len(X_cubes)
         for i, cube in enumerate(X_cubes):
-            time.sleep(0.02)
+            time.sleep(0.1)
             if (i + 1) % int(len_X_cubes * 0.2) == 0 or i == 0:
                 print(f"{i + 1}/{len_X_cubes}...")
             value = m_utils.get_updated_cost_to_go_value(cube, model_improve)
@@ -54,7 +54,7 @@ def train(
         if model_path is not None:
             model_learn.save_weights(model_path)
             print("Saved model!")
-            time.sleep(1.0)
+            time.sleep(0.3)
             if model_backup_path is not None:
                 shutil.copyfile(model_path, model_backup_path)
                 print("## Copied model to backup file! ##")

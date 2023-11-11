@@ -1,35 +1,42 @@
-import model_utils as m_utils
-import data_utils as data
-import inference
-import pycuber as pc
+import json
+import matplotlib.pyplot as plt
 
 
-PATH_MODEL = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/model.h5"
-
-model = m_utils.build_model()
-model.load_weights(PATH_MODEL)
-
-cube = pc.Cube()
-cube("F")
-cube("R")
-cube("D")
-cube("U'")
-cube("R'")
-cube("L")
-
-print(cube)
-
-sequence = inference.solve_with_batch_dive(cube, model, max_num_iterations=50, batch_depth=3, prune_to_best_n=2)
-print("Sequence:", sequence)
-for move in sequence:
-    cube(move)
-
-print("RESULT:")
-print(cube)
+PATH_TO_N_SHUFFLES_DATA = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/times_metrics.json"
 
 
-"""cubes = data.get_scrambled_cubes(num_sequences=1, max_num_scrambles=25)
-for cube in cubes:
-    flattened = data.flatten_one_hot(cube).reshape((1, -1))
-    cost_to_go = model(flattened).numpy()[0][0]
-    print(cost_to_go)"""
+def analyze_n_shuffles_performance():
+    with open(PATH_TO_N_SHUFFLES_DATA, "r") as file:
+        metrics = json.load(file)
+    
+    sample = list(metrics.values())[0]["metrics_per_n_shuffles"]
+    means_mins_maxes = {}
+    for n_shuffles in sample.keys():
+        means_mins_maxes[int(n_shuffles)] = {
+            "means": [],
+            "mins": [],
+            "maxes": [],
+            "abs_error_mean": []
+        }
+
+    for _, single_metrics in list(metrics.items()):
+        metrics_per_n_shuffles = single_metrics["metrics_per_n_shuffles"]
+        for n_shuffles, details in metrics_per_n_shuffles.items():
+            means_mins_maxes[int(n_shuffles)]["means"].append(details["mean_pred"])
+            means_mins_maxes[int(n_shuffles)]["mins"].append(details["min_pred"])
+            means_mins_maxes[int(n_shuffles)]["maxes"].append(details["max_pred"])
+            means_mins_maxes[int(n_shuffles)]["abs_error_mean"].append(details["mean_pred"] - int(n_shuffles))
+
+    print(json.dumps(means_mins_maxes, indent=4))
+
+    plt.figure(figsize=(10, 7))
+    plt.title("Error of the Means by n_shuffles")
+    total_range = range(len(metrics.keys()))
+    for n_shuffles, details_lists in means_mins_maxes.items():
+        if n_shuffles in [3, 8, 12, 15]:
+            plt.plot(total_range, details_lists["abs_error_mean"], label=str(n_shuffles))
+    plt.legend()
+    plt.show()
+
+
+analyze_n_shuffles_performance()
