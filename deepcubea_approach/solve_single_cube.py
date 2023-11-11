@@ -19,7 +19,7 @@ cube("L")
 cube("R")
 cube("D")"""
 
-cube = data.get_single_scrambled_cube(num_scrambles=9)
+cube = data.get_single_scrambled_cube(num_scrambles=10)
 print(cube)
 
 sequence = inference.solve_with_batch_dive(cube, model, max_num_iterations=50, batch_depth=3, prune_to_best_n=2)
