@@ -2,6 +2,7 @@ import model_utils as m_utils
 import data_utils as data
 import numpy as np
 import json
+import time
 
 
 PATH_TO_TIMES = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/training_seconds.json"
@@ -10,14 +11,20 @@ PATH_TO_MODEL = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepc
 PATH_TO_TIMES_METRICS_NEW = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/times_metrics.json"
 
 def test_deviation_single_cubes(
-    path_to_model: str = PATH_TO_MODEL,
-    path_to_times_metrics: str = PATH_TO_TIMES_METRICS,
-    path_to_times: str = PATH_TO_TIMES,
+    time_since_last_save: float,
+    path_to_model: str,
+    path_to_times_mae: str,
+    path_to_times_metrics_n_shuffles: str,
     iterations_per_n_shuffles: int = 30,
     n_shuffles_lower: int = 3,
-    n_shuffles_upper: int = 15
+    n_shuffles_upper: int = 15,
+    idle: float = None
 ):
-    model = m_utils.build_model()
+    if "simple" in path_to_model:
+        model = m_utils.build_model_simple()
+    elif "complex" in path_to_model:
+        model = m_utils.build_model_residual()
+
     model.load_weights(path_to_model)
 
     preds = []
@@ -41,7 +48,10 @@ def test_deviation_single_cubes(
 
             preds.append(pred)
             y_true.append(n_shuffles)
-        
+
+            if idle:
+                time.sleep(idle)
+
         if n_shuffles in [3, 8, 12, 15]:
             mean_pred = sum_pred / iterations_per_n_shuffles
             metrics_per_n_shuffles[n_shuffles] = {
@@ -63,25 +73,25 @@ def test_deviation_single_cubes(
     mae = np.mean(np.abs(preds - y_true))
     print("mae:", mae)
 
-    with open(path_to_times, "r") as file:
-        training_seconds = json.load(file)
-
-    total_seconds_trained = sum(training_seconds)
-
     # MAE ONLY
-    with open(path_to_times_metrics, "r") as file:
+    with open(path_to_times_mae, "r") as file:
         times_metrics = json.load(file)
+    
+    if len(times_metrics.keys()) == 0:
+        total_seconds_trained = time_since_last_save
+    else:
+        total_seconds_trained = float(list(times_metrics.keys())[-1]) + time_since_last_save
 
     times_metrics[total_seconds_trained] = mae
 
-    with open(path_to_times_metrics, "w") as file:
+    with open(path_to_times_mae, "w") as file:
         file.write(json.dumps(times_metrics, indent=4))
 
     print("Wrote results to times_metrics!")
     # END MAE ONLY
 
     # MAE AND METRICS PER N_SHUFFLES
-    with open(PATH_TO_TIMES_METRICS_NEW, "r") as file:
+    with open(path_to_times_metrics_n_shuffles, "r") as file:
         times_metrics = json.load(file)
 
     times_metrics[total_seconds_trained] = {
@@ -89,8 +99,8 @@ def test_deviation_single_cubes(
         "metrics_per_n_shuffles": metrics_per_n_shuffles
     }
 
-    with open(PATH_TO_TIMES_METRICS_NEW, "w") as file:
+    with open(path_to_times_metrics_n_shuffles, "w") as file:
         file.write(json.dumps(times_metrics, indent=4))
 
-    print("Wrote results to times_metrics!")
+    print("Wrote results to times_metrics_per_n_shuffles!")
     # END MAE AND METRICS PER N_SHUFFLES

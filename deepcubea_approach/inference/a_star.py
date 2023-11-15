@@ -65,11 +65,12 @@ def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, 
             return tree.get_path_to_node(best_leaf)
 
         print(f"Best leaf's score: {best_leaf.cost_to_go}")
+        print(f"Best leaf's cube:\n{best_leaf.cube}")
         tree.prune_tree_to_best_n_leafs(n=prune_to_best_n)
 
         it_counter += 1
 
-    return []
+    return None
 
 
 def solve_with_a_star(start_cube: Cube, model: Model, max_num_iterations: int = 999_999) -> List:

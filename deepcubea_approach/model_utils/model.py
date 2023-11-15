@@ -37,9 +37,11 @@ def build_model_simple(learning_rate=1e-3):
 def residual_block(x: np.array):
     fx = layers.Dense(1024)(x)
     fx = layers.LeakyReLU()(fx)
+    x = layers.BatchNormalization()(fx)
 
     fx = layers.Dense(1024)(fx)
     fx = layers.LeakyReLU()(fx)
+    x = layers.BatchNormalization()(fx)
 
     out = layers.Add()([fx, x])
     out = layers.LeakyReLU()(out)
@@ -53,9 +55,11 @@ def build_model_residual(learning_rate=1e-3):
 
     x = layers.Dense(5120)(inputs)
     x = layers.LeakyReLU()(x)
+    x = layers.BatchNormalization()(x)
     
     x = layers.Dense(1024)(x)
     x = layers.LeakyReLU()(x)
+    x = layers.BatchNormalization()(x)
     
     for _ in range(4):
         x = residual_block(x)

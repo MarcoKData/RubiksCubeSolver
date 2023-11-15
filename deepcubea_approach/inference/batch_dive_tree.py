@@ -26,6 +26,7 @@ class BatchDiveTree():
         self.model = model
         self.root = None
         self.former_best_leafs = []
+        self.scores_visited = []
 
         cube = Cube()
         first_children = r_utils.get_children(cube)
@@ -62,8 +63,11 @@ class BatchDiveTree():
         preds = np.array([pred[0] for pred in self.model(children_cubes_flattened).numpy()])
         if idx_solved is not None:
             preds[idx_solved] = -999_999
+        
+        children = [children[i] for i in range(len(children)) if preds[i] not in self.scores_visited]
+        preds = [pred for pred in preds if pred not in self.scores_visited]
 
-        smallest_indices = preds.argsort()[:width_to_expand]
+        smallest_indices = np.array(preds).argsort()[:width_to_expand]
         children = [(children[idx], preds[idx]) for idx in smallest_indices]
 
         for (move, child), cost_to_go in children:
@@ -74,6 +78,7 @@ class BatchDiveTree():
             new_node.cost_to_go = cost_to_go
             self.nodes.append(new_node)
             self.next_node_id += 1
+            self.scores_visited.append(cost_to_go)
         node.is_leaf = False
 
     def get_best_leaf(self):
@@ -82,7 +87,6 @@ class BatchDiveTree():
         
         return leafs[0]
 
-    
     def get_node_by_id(self, id_value: int):
         for node in self.nodes:
             if node.id == id_value:

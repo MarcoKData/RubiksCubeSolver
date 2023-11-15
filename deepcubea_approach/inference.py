@@ -5,7 +5,7 @@ import numpy as np
 
 
 model = m_utils.build_model()
-model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/model.h5")
+model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/simple/model.h5")
 
 solved_n_shuffles = []
 solution_lens = []
@@ -20,7 +20,8 @@ while True:
         model=model,
         batch_depth=4,
         prune_to_best_n=2,
-        width_per_layer=5
+        width_per_layer=5,
+        max_num_iterations=10
     )
     if sequence is None:
         break

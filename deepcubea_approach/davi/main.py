@@ -18,6 +18,7 @@ def train(
     model_backup_path: str = None,
     path_training_times: str = None,
     path_to_training_times_metrics: str = None,
+    path_to_times_metrics_new: str = None,
     load_model_weights: bool = False
 ) -> None:
     model_learn = m_utils.build_model()
@@ -26,6 +27,7 @@ def train(
     if model_path is not None and load_model_weights:
         model_learn.load_weights(model_path)
         model_improve.load_weights(model_path)
+        print("Loaded model weights!")
 
     for m in range(training_iterations):
         t0 = datetime.now()
@@ -35,7 +37,7 @@ def train(
 
         len_X_cubes = len(X_cubes)
         for i, cube in enumerate(X_cubes):
-            time.sleep(0.1)
+            time.sleep(0.05)
             if (i + 1) % int(len_X_cubes * 0.2) == 0 or i == 0:
                 print(f"{i + 1}/{len_X_cubes}...")
             value = m_utils.get_updated_cost_to_go_value(cube, model_improve)
@@ -84,6 +86,7 @@ def train(
             m_utils.test_deviation_single_cubes(
                 path_to_model=model_backup_path,
                 path_to_times=path_training_times,
-                path_to_times_metrics=path_to_training_times_metrics
+                path_to_times_metrics=path_to_training_times_metrics,
+                path_to_times_metrics_new=path_to_times_metrics_new
             )
             print("#### Tested Deviation on Single Cubes! ####")
