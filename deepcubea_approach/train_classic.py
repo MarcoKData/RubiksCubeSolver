@@ -70,6 +70,7 @@ def train_classic(model_type: str, model_path: str, n_training_iterations: int, 
             path_to_model=model_path,
             path_to_times_mae=path_times_mae,
             path_to_times_metrics_n_shuffles=path_metrics_n_shuffles,
+            model_type=model_type,
             iterations_per_n_shuffles=50,
             idle=0.0
         )

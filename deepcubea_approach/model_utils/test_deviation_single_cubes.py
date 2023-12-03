@@ -16,14 +16,15 @@ def test_deviation_single_cubes(
     path_to_model: str,
     path_to_times_mae: str,
     path_to_times_metrics_n_shuffles: str,
+    model_type: str,
     iterations_per_n_shuffles: int = 30,
     n_shuffles_lower: int = 3,
     n_shuffles_upper: int = 15,
     idle: float = None
 ):
-    if "simple" in path_to_model:
+    if model_type == "simple":
         model = m_utils.build_model_simple()
-    elif "complex" in path_to_model:
+    elif model_type == "complex":
         model = m_utils.build_model_residual()
 
     model.load_weights(path_to_model)
