@@ -4,6 +4,7 @@ import numpy as np
 import json
 import time
 import os
+import inference
 
 
 PATH_TO_TIMES = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/training_seconds.json"
@@ -16,6 +17,7 @@ def test_deviation_single_cubes(
     path_to_model: str,
     path_to_times_mae: str,
     path_to_times_metrics_n_shuffles: str,
+    path_to_n_shuffles_solved: str,
     model_type: str,
     iterations_per_n_shuffles: int = 30,
     n_shuffles_lower: int = 3,
@@ -114,3 +116,23 @@ def test_deviation_single_cubes(
 
     print("Wrote results to times_metrics_per_n_shuffles!")
     # END MAE AND METRICS PER N_SHUFFLES
+
+    # N_SHUFFLES SOLVED
+    if not os.path.exists(path_to_n_shuffles_solved):
+        with open(path_to_n_shuffles_solved, "w") as file:
+            file.write(json.dumps({}))
+
+    with open(path_to_n_shuffles_solved, "r") as file:
+        times_n_shuffles_solved = json.load(file)
+
+    max_n_shuffles, solution_lens_max = inference.get_max_n_shuffles_solved_plus_solution_lens(model)
+    times_n_shuffles_solved[total_seconds_trained] = {
+        "max_n_shuffles": max_n_shuffles,
+        "solution_lengths_max": solution_lens_max
+    }
+
+    with open(path_to_n_shuffles_solved, "w") as file:
+        file.write(json.dumps(times_n_shuffles_solved, indent=4))
+
+    print("Wrote results to times_n_shuffles_solved!")
+    # END N_SHUFFLES SOLVED

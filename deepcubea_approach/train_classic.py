@@ -22,7 +22,7 @@ def append_mae_to_times_mae(path_times_mae: str, mae: float, seconds_iteration: 
 
 
 def train_classic(model_type: str, model_path: str, n_training_iterations: int, num_cube_sequences: int, num_scrambles_per_sequence: int, num_epochs_per_dataset: int,
-                  path_times_mae: str, path_metrics_n_shuffles: str):
+                  path_times_mae: str, path_metrics_n_shuffles: str, path_to_n_shuffles_solved: str):
     if model_type == "simple":
         model = m_utils.build_model_simple()
     elif model_type == "complex":
@@ -70,6 +70,7 @@ def train_classic(model_type: str, model_path: str, n_training_iterations: int, 
             path_to_model=model_path,
             path_to_times_mae=path_times_mae,
             path_to_times_metrics_n_shuffles=path_metrics_n_shuffles,
+            path_to_n_shuffles_solved=path_to_n_shuffles_solved,
             model_type=model_type,
             iterations_per_n_shuffles=50,
             idle=0.0
@@ -81,12 +82,13 @@ def train_classic(model_type: str, model_path: str, n_training_iterations: int, 
 
 if __name__ == "__main__":
     train_classic(
-        model_type="complex",
-        model_path="./saved_models/classic-training/complex/model.h5",
+        model_type="simple",
+        model_path="./saved_models/classic-training/simple/model.h5",
         n_training_iterations=10,
         num_cube_sequences=5,
         num_scrambles_per_sequence=10,
         num_epochs_per_dataset=5,
-        path_times_mae="./saved_models/classic-training/complex/times_mae.json",
-        path_metrics_n_shuffles="./saved_models/classic-training/complex/times_metrics_n_shuffles.json"
+        path_times_mae="./saved_models/classic-training/simple/times_mae.json",
+        path_metrics_n_shuffles="./saved_models/classic-training/simple/times_metrics_n_shuffles.json",
+        path_to_n_shuffles_solved="./saved_models/classic-training/simple/times_n_shuffles_solved.json"
     )

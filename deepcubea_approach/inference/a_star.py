@@ -39,33 +39,35 @@ class AStarGraph():
 
 
 
-def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, prune_to_best_n: int = 3, width_per_layer: int = 5, max_num_iterations: int = 999_999) -> List:
+def solve_with_batch_dive(start_cube: Cube, model: Model, batch_depth: int = 3, prune_to_best_n: int = 3, width_per_layer: int = 5,
+                          max_num_iterations: int = 999_999, print_stuff: bool = False) -> List:
     tree = BatchDiveTree(model)
     tree.add_root(start_cube)
 
     is_solved = False
     it_counter = 0
     while not is_solved:
-        print(f"{it_counter + 1} (max {max_num_iterations})...")
+        if print_stuff:
+            print(f"{it_counter + 1} (max {max_num_iterations})...")
         if it_counter >= max_num_iterations:
             break
 
         for i in range(batch_depth):
-            print(f"Expanding {i + 1}/{batch_depth}!")
+            if print_stuff:
+                print(f"Expanding {i + 1}/{batch_depth}!")
             is_solved = tree.expand_layer(width_to_expand=width_per_layer)
             if is_solved:
                 break
-
-        print("Scoring leafs...")
+        
+        if print_stuff:
+            print("Scoring leafs...")
         best_leaf = tree.get_best_leaf()
         if is_solved:
-            """for node in tree.nodes:
-                print(node.cube, node.id, node.cost_to_go, node.how_did_i_get_here, node.is_root, node.parent_id)
-                print("NEXT NODE")"""
             return tree.get_path_to_node(best_leaf)
 
-        print(f"Best leaf's score: {best_leaf.cost_to_go}")
-        print(f"Best leaf's cube:\n{best_leaf.cube}")
+        if print_stuff:
+            print(f"Best leaf's score: {best_leaf.cost_to_go}")
+            print(f"Best leaf's cube:\n{best_leaf.cube}")
         tree.prune_tree_to_best_n_leafs(n=prune_to_best_n)
 
         it_counter += 1

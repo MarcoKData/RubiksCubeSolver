@@ -1,38 +1,11 @@
 import inference
-import data_utils as data
 import model_utils as m_utils
-import numpy as np
 
 
-model = m_utils.build_model()
-model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/simple/model.h5")
+model = m_utils.build_model_simple()
+model.load_weights("/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/classic-training/simple/model.h5")
 
-solved_n_shuffles = []
-solution_lens = []
-n_shuffles = 1
-while True:
-    print(f"Testing n_shuffles: {n_shuffles}")
-    cube = data.get_single_scrambled_cube(num_scrambles=n_shuffles)
-
-    # sequence = inference.solve_with_a_star(cube, model, max_num_iterations=30)
-    sequence = inference.solve_with_batch_dive(
-        start_cube=cube,
-        model=model,
-        batch_depth=4,
-        prune_to_best_n=2,
-        width_per_layer=5,
-        max_num_iterations=10
-    )
-    if sequence is None:
-        break
-
-    solved_n_shuffles.append(n_shuffles)
-    solution_lens.append(len(sequence))
-    n_shuffles += 1
-    print(f"Sequence: {sequence}")
-
-solution_lens = np.array(solution_lens)
+n_shuffles, solution_lens_max = inference.get_max_n_shuffles_solved_plus_solution_lens(model)
 
 print(f"\nSolved up to n_shuffles = {n_shuffles}")
-print(f"solution lens: {solution_lens}")
-print(f"Maximum solution length: {solution_lens.max()}")
+print(f"Maximum solution length: {solution_lens_max}")
