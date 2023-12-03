@@ -10,6 +10,16 @@ color_list_map = {'green': [1, 0, 0, 0, 0, 0], 'blue': [0, 1, 0, 0, 0, 0], 'yell
 inv_action_map = {v: k for k, v in action_map.items()}
 
 
+def get_children_moves(cube):
+    children = []
+    for action in action_map.keys():
+        cube_copy = cube.copy()
+        cube_copy = cube_copy(action)
+        children.append((cube_copy, action))
+    
+    return children
+
+
 def generate_sequence(n_shuffles=5):
     cube = pc.Cube()
     transformations = [random.choice(list(action_map.keys())) for _ in range(n_shuffles)]
@@ -24,9 +34,9 @@ def generate_sequence(n_shuffles=5):
     
     formula.reverse()
     for i in range(len(formula)):
-        cubes.append(cube.copy())
-        distances_to_solved.append(len(formula) - i)
         cube(formula[i])
+        cubes.append(cube.copy())
+        distances_to_solved.append(len(formula) - i - 1)
     
     return cubes, distances_to_solved
 
@@ -50,6 +60,7 @@ def flatten_one_hot(cube):
         for i in range(3):
             for j in range(3):
                 flat.extend(color_list_map[x[i][j].colour])
+
     return flat
 
 
@@ -60,6 +71,7 @@ def flatten(cube):
         for i in range(3):
             for j in range(3):
                 flat.append(x[i][j].colour)
+
     return flat
 
 
@@ -141,6 +153,8 @@ def generate_sample_cube(n_shuffles=5):
             list_of_actions = [action for action in list(action_map.keys()) if action != transformations[-1]]
         
         transformations.append(random.choice(list_of_actions))
+    
+    print(transformations)
 
     formula = pc.Formula(transformations)
     cube(formula)
@@ -150,3 +164,13 @@ def generate_sample_cube(n_shuffles=5):
 
 def cube_is_solved(cube):
     return perc_solved_cube(cube) > 0.99
+
+
+def get_reverse_move(move):
+    if move is not None:
+        reverse_move = move + "'"
+        reverse_move = reverse_move.replace("''", "")
+    else:
+        reverse_move = None
+
+    return reverse_move
