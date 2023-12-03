@@ -3,6 +3,7 @@ import data_utils as data
 import numpy as np
 import json
 import time
+import os
 
 
 PATH_TO_TIMES = "/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/training_seconds.json"
@@ -74,6 +75,10 @@ def test_deviation_single_cubes(
     print("mae:", mae)
 
     # MAE ONLY
+    if not os.path.exists(path_to_times_mae):
+        with open(path_to_times_mae, "w") as file:
+            file.write(json.dumps({}))
+
     with open(path_to_times_mae, "r") as file:
         times_metrics = json.load(file)
     
@@ -91,6 +96,10 @@ def test_deviation_single_cubes(
     # END MAE ONLY
 
     # MAE AND METRICS PER N_SHUFFLES
+    if not os.path.exists(path_to_times_metrics_n_shuffles):
+        with open(path_to_times_metrics_n_shuffles, "w") as file:
+            file.write(json.dumps({}))
+
     with open(path_to_times_metrics_n_shuffles, "r") as file:
         times_metrics = json.load(file)
 
