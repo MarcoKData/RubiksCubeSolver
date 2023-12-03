@@ -21,81 +21,71 @@ def append_mae_to_times_mae(path_times_mae: str, mae: float, seconds_iteration: 
         file.write(json.dumps(times_mae, indent=4))
 
 
-MODEL_TYPE = "complex"
+def train_classic(model_type: str, model_path: str, n_training_iterations: int, num_cube_sequences: int, num_scrambles_per_sequence: int, num_epochs_per_dataset: int,
+                  path_times_mae: str, path_metrics_n_shuffles: str):
+    if model_type == "simple":
+        model = m_utils.build_model_simple()
+    elif model_type == "complex":
+        model = m_utils.build_model_residual()
 
+    model.summary()
 
-MODEL_DIR = f"/Users/marcokleimaier/Documents/Projekte/RubiksCubeSolver/deepcubea_approach/saved_models/classic-training/{MODEL_TYPE}"
-MODEL_PATH = os.path.join(MODEL_DIR, "model.h5")
-PATH_TIMES_MAE = os.path.join(MODEL_DIR, "times_mae.json")
-PATH_METRICS_N_SHUFFLES = os.path.join(MODEL_DIR, "times_metrics_n_shuffles.json")
-
-if os.path.exists(MODEL_PATH):
-    LOAD_WEIGHTS = True
-else:
-    LOAD_WEIGHTS = False
-
-SAVE_WEIGHTS = True
-
-N_ITERATIONS = 20
-NUM_CUBE_SEQUENCES = 500
-NUM_SCRAMBLES_PER_SEQUENCE = 20
-NUM_EPOCHS_PER_DATASET = 25
-
-
-if MODEL_TYPE == "simple":
-    model = m_utils.build_model_simple()
-elif MODEL_TYPE == "complex":
-    model = m_utils.build_model_residual()
-
-model.summary()
-
-if LOAD_WEIGHTS:
-    model.load_weights(MODEL_PATH)
-    print("\nLoaded weights!")
-else:
-    print("\nDid not load weights, training new model!")
-
-
-for iteration in range(N_ITERATIONS):
-    print(f"\n{iteration + 1}/{N_ITERATIONS}...")
-
-    print("Getting cubes...")
-    cubes_flattened, distances = data.get_scrambled_cubes_flattened_with_distances(
-        num_sequences=NUM_CUBE_SEQUENCES,
-        num_scrambles=NUM_SCRAMBLES_PER_SEQUENCE,
-        idle=0.01
-    )
-
-    X_train, X_test, y_train, y_test = train_test_split(cubes_flattened, distances, test_size=0.3)
-
-    print("Training model...")
-    t0 = datetime.now()
-    model.fit(
-        X_train,
-        y_train,
-        batch_size=32,
-        epochs=NUM_EPOCHS_PER_DATASET,
-        validation_data=(X_test, y_test),
-        verbose=1
-    )
-    t1 = datetime.now()
-
-    if SAVE_WEIGHTS:
-        model.save_weights(MODEL_PATH)
-        print("Saved weights!")
+    if os.path.exists(model_path):
+        model.load_weights(model_path)
+        print("\nLoaded weights!")
     else:
-        print("Did not save weights!")
+        print("\nDid not load weights, training new model!")
 
-    seconds_iteration = (t1 - t0).total_seconds()
+    for iteration in range(n_training_iterations):
+        print(f"\n{iteration + 1}/{n_training_iterations}...")
 
-    m_utils.test_deviation_single_cubes(
-        time_since_last_save=seconds_iteration,
-        path_to_model=MODEL_PATH,
-        path_to_times_mae=PATH_TIMES_MAE,
-        path_to_times_metrics_n_shuffles=PATH_METRICS_N_SHUFFLES,
-        iterations_per_n_shuffles=50,
-        idle=0.05
+        print("Getting cubes...")
+        cubes_flattened, distances = data.get_scrambled_cubes_flattened_with_distances(
+            num_sequences=num_cube_sequences,
+            num_scrambles=num_scrambles_per_sequence,
+            idle=0.0
+        )
+
+        X_train, X_test, y_train, y_test = train_test_split(cubes_flattened, distances, test_size=0.3)
+
+        print("Training model...")
+        t0 = datetime.now()
+        model.fit(
+            X_train,
+            y_train,
+            batch_size=32,
+            epochs=num_epochs_per_dataset,
+            validation_data=(X_test, y_test),
+            verbose=1
+        )
+        t1 = datetime.now()
+
+        model.save_weights(model_path)
+        print("Saved weights!")
+
+        seconds_iteration = (t1 - t0).total_seconds()
+
+        m_utils.test_deviation_single_cubes(
+            time_since_last_save=seconds_iteration,
+            path_to_model=model_path,
+            path_to_times_mae=path_times_mae,
+            path_to_times_metrics_n_shuffles=path_metrics_n_shuffles,
+            iterations_per_n_shuffles=50,
+            idle=0.0
+        )
+
+
+    print("\n########\nFinished training!\n########\n")
+
+
+if __name__ == "__main__":
+    train_classic(
+        model_type="complex",
+        model_path="./saved_models/classic-training/complex/model.h5",
+        n_training_iterations=10,
+        num_cube_sequences=5,
+        num_scrambles_per_sequence=10,
+        num_epochs_per_dataset=5,
+        path_times_mae="./saved_models/classic-training/complex/times_mae.json",
+        path_metrics_n_shuffles="./saved_models/classic-training/complex/times_metrics_n_shuffles.json"
     )
-
-
-print("\n########\nFinished training!\n########\n")
