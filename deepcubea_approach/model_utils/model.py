@@ -34,6 +34,38 @@ def build_model_simple(learning_rate=1e-3):
     return model
 
 
+def build_model_simple_cc(num_classes: int, learning_rate=1e-3):
+    inputs = layers.Input(shape=(324,))
+
+    x = layers.Dense(1024)(inputs)
+    x = layers.LeakyReLU()(x)
+    
+    x = layers.Dense(1024)(x)
+    x = layers.LeakyReLU()(x)
+    
+    x = layers.Dense(1024)(x)
+    x = layers.LeakyReLU()(x)
+    
+    x = layers.Dense(50)(x)
+    x = layers.LeakyReLU()(x)
+
+    out = layers.Dense(num_classes)(x)
+    out = layers.Activation("softmax")(out)
+
+    model = Model(
+        inputs=inputs,
+        outputs=out
+    )
+
+    model.compile(
+        loss="categorical_crossentropy",
+        optimizer=Adam(learning_rate=learning_rate),
+        metrics=["accuracy"]
+    )
+
+    return model
+
+
 def residual_block(x: np.array):
     fx = layers.Dense(1024)(x)
     fx = layers.LeakyReLU()(fx)
