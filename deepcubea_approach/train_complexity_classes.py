@@ -29,7 +29,8 @@ def train_complexity_classes(
     step_width_num_scrambles: int,
     load_weights: bool,
     model_base_dir: str,
-    epochs_per_iteration: int
+    epochs_per_iteration: int,
+    training_verbosity: int
 ):
     # only mock to get num_classes
     _, _, num_classes = data.get_data_complexity_classes_f(
@@ -62,7 +63,7 @@ def train_complexity_classes(
             epochs=epochs_per_iteration,
             batch_size=32,
             validation_data=(X_test, y_test),
-            verbose=0
+            verbose=training_verbosity
         )
 
         model_dir = os.path.join(model_base_dir, str(num_classes))
@@ -139,5 +140,6 @@ if __name__ == "__main__":
         up_to_num_scrambles_for_classes=UP_TO_NUM_SCRAMBLES_CLASSES,
         step_width_num_scrambles=STEP_WIDTH_NUM_SCRAMBLES,
         model_base_dir=MODEL_BASE_DIR,
-        load_weights=False
+        load_weights=False,
+        training_verbosity=0
     )
