@@ -55,23 +55,27 @@ def train_complexity_classes(
         )
         X_train, X_test, y_train, y_test = train_test_split(cubes, distance_classes, test_size=0.3)
         
+        print("Fitting...")
         model.fit(
             x=X_train,
             y=y_train,
             epochs=epochs_per_iteration,
             batch_size=32,
-            validation_data=(X_test, y_test)
+            validation_data=(X_test, y_test),
+            verbose=0
         )
 
         model_dir = os.path.join(model_base_dir, str(num_classes))
         if not os.path.exists(model_dir):
             os.mkdir(model_dir)
         
+        print("Saving Weights...")
         model.save(os.path.join(model_dir, "model.h5"))
 
         t_inter = datetime.now()
         dt = (t_inter - t_start).total_seconds()
 
+        print("Evaluating...")
         metrics_classes = evaluate_complexity_classes(
             num_seq=200,
             num_scrablmes=num_scrablmes,
